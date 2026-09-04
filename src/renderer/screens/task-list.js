@@ -18,6 +18,7 @@ const SETUP_STEPS =
 
 export const FILTERS = ['all', 'today', 'late', 'wip'];
 const collapsedProjects = new Set();
+let lastKeyboardCollapse = null;
 
 const MATCHES_FILTER = {
   all: () => true,
@@ -142,8 +143,27 @@ export function collapseSelectedProject() {
   const item = state.rows[state.selectedIndex];
   if (!item) return false;
 
-  collapsedProjects.add(projectKey(item));
+  const key = projectKey(item);
+  lastKeyboardCollapse = { projectKey: key, taskKey: item.key };
+  collapsedProjects.add(key);
   taskListScreen.render();
+  const header = Array.from(elements.list.querySelectorAll('.project-toggle')).find(
+    (candidate) => candidate.dataset.projectKey === key
+  );
+  if (header && header.scrollIntoView) header.scrollIntoView({ block: 'nearest' });
+  elements.search.focus();
+  return true;
+}
+
+export function expandLastCollapsedProject() {
+  if (!lastKeyboardCollapse) return false;
+
+  const { projectKey: key, taskKey } = lastKeyboardCollapse;
+  if (!collapsedProjects.has(key)) return false;
+
+  collapsedProjects.delete(key);
+  lastKeyboardCollapse = null;
+  taskListScreen.render({ restoreKey: taskKey });
   elements.search.focus();
   return true;
 }
@@ -154,8 +174,14 @@ elements.list.addEventListener('click', (event) => {
 
   const selectedKey = state.rows[state.selectedIndex] && state.rows[state.selectedIndex].key;
   const key = toggle.dataset.projectKey;
-  if (collapsedProjects.has(key)) collapsedProjects.delete(key);
-  else collapsedProjects.add(key);
+  if (collapsedProjects.has(key)) {
+    collapsedProjects.delete(key);
+    if (lastKeyboardCollapse && lastKeyboardCollapse.projectKey === key) {
+      lastKeyboardCollapse = null;
+    }
+  } else {
+    collapsedProjects.add(key);
+  }
 
   taskListScreen.render({ restoreKey: selectedKey });
   elements.search.focus();

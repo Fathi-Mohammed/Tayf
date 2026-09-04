@@ -8,7 +8,8 @@ import {
   FILTERS,
   setFilter,
   backToTaskList,
-  collapseSelectedProject
+  collapseSelectedProject,
+  expandLastCollapsedProject
 } from './screens/task-list.js';
 import { transitionContext, chooseTransition } from './screens/transitions.js';
 import { submit as submitTransitionForm, copyEstimateIntoWorklog } from './screens/transition-form.js';
@@ -187,10 +188,15 @@ function handleActionMenu(event, key) {
 function handleList(event, key, screen) {
   const onTaskList = screen === 'tasks';
 
-  if (onTaskList && event.shiftKey && event.key === 'ArrowLeft') {
+  if (
+    onTaskList &&
+    event.shiftKey &&
+    (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+  ) {
     event.preventDefault();
     closeMenu();
-    collapseSelectedProject();
+    if (event.key === 'ArrowLeft') collapseSelectedProject();
+    else expandLastCollapsedProject();
     return true;
   }
 
