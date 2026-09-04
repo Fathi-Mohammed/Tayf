@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('tayf', {
   applyTransition: (request) => ipcRenderer.invoke('item:transition', request),
   updateItem: (request) => ipcRenderer.invoke('item:update', request),
   createItem: (draft) => ipcRenderer.invoke('item:create', draft),
+  comment: (request) => ipcRenderer.invoke('item:comment', request),
 
   boards: () => ipcRenderer.invoke('meta:boards'),
   boardRequirements: (boardId) => ipcRenderer.invoke('meta:boardRequirements', boardId),

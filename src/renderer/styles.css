@@ -936,6 +936,29 @@
   }
   #vdesc.empty { color: var(--dim); font-style: italic; }
 
+  #vcomments { display: flex; flex-direction: column; gap: var(--sp-3); margin-top: var(--sp-5); }
+  .vcold { font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--dim); }
+  .vcom {
+    padding: var(--sp-4) var(--sp-5); background: var(--fill-3);
+    border: 1px solid var(--fill-2); border-radius: var(--r-3);
+  }
+  .vcom b {
+    display: block; margin-bottom: var(--sp-2); font-weight: 400;
+    font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--dim);
+  }
+  .vcom span {
+    display: block; font-size: var(--fs-callout); line-height: var(--lh-relaxed);
+    color: var(--text-3); white-space: pre-wrap;
+  }
+  #vcin {
+    width: 100%; margin-top: var(--sp-5); padding: var(--sp-4); resize: none;
+    background-color: var(--fill); border: 1px solid transparent; border-radius: var(--r-3);
+    color: var(--text); font-family: var(--sans); font-size: var(--fs-body);
+    line-height: var(--lh-normal); outline: none;
+  }
+  #vcin:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
+  #vcin::placeholder { color: var(--dim); }
+
   .cgrid textarea {
     width: 100%; padding: var(--sp-4); resize: none;
     background-color: var(--fill);

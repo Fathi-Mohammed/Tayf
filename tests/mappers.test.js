@@ -39,6 +39,22 @@ const RAW_ISSUE = {
         { type: 'paragraph', content: [{ type: 'text', text: 'first line' }] },
         { type: 'paragraph', content: [{ type: 'text', text: 'second line' }] }
       ]
+    },
+    comment: {
+      comments: [
+        {
+          id: '1',
+          author: { displayName: 'Fathy' },
+          created: '2026-09-01T12:00:00.000+0000',
+          body: paragraph('on it')
+        },
+        {
+          id: '2',
+          author: { displayName: 'Sara' },
+          created: '2026-09-02T09:00:00.000+0000',
+          body: paragraph('looks good')
+        }
+      ]
     }
   }
 };
@@ -83,6 +99,37 @@ test('toWorkItemDetail separates custom option fields from custom date fields', 
 
 test('toWorkItemDetail flattens the description document to plain text', () => {
   assert.equal(toWorkItemDetail(RAW_ISSUE).description, 'first line\n\nsecond line');
+});
+
+test('toWorkItemDetail flattens comments to author, time and plain text', () => {
+  const detail = toWorkItemDetail(RAW_ISSUE);
+  assert.equal(detail.comments.length, 2);
+  assert.deepEqual(detail.comments[1], {
+    id: '2',
+    author: 'Sara',
+    at: '2026-09-02T09:00:00.000+0000',
+    text: 'looks good'
+  });
+});
+
+test('toWorkItemDetail keeps the newest comments and drops the rest', () => {
+  const comments = Array.from({ length: 7 }, (_, index) => ({
+    id: String(index),
+    author: { displayName: 'Fathy' },
+    created: '2026-09-02T09:00:00.000+0000',
+    body: paragraph(`comment ${index}`)
+  }));
+
+  const fields = { comment: { comments, total: comments.length } };
+  const detail = toWorkItemDetail({ key: 'X-1', fields });
+  assert.equal(detail.comments.length, 5);
+  assert.equal(detail.comments[0].text, 'comment 2');
+  assert.equal(detail.comments[4].text, 'comment 6');
+  assert.equal(detail.commentTotal, 7);
+});
+
+test('toWorkItemDetail reports no comments when the issue has none', () => {
+  assert.deepEqual(toWorkItemDetail({ key: 'X-1', fields: {} }).comments, []);
 });
 
 test('toTransition exposes the resolutions Jira offers, and nothing invented', () => {

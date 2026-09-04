@@ -17,7 +17,11 @@ import { FILTERS, setFilter, backToTaskList } from './screens/task-list.js';
 import { transitionContext, chooseTransition } from './screens/transitions.js';
 import { submit as submitTransitionForm, copyEstimateIntoWorklog } from './screens/transition-form.js';
 import { submit as submitCompose, currentDetail as composeDetail, isEditing } from './screens/compose.js';
-import { currentDetail as viewedDetail } from './screens/item-view.js';
+import {
+  currentDetail as viewedDetail,
+  focusComment,
+  sendComment
+} from './screens/item-view.js';
 import {
   save as saveSettings,
   showTabByNumber,
@@ -74,8 +78,23 @@ function handleSettings(event, key) {
   return true;
 }
 
+function handleComment(event) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    elements.vcin.blur();
+    return true;
+  }
+  if (event.key === 'Enter' && hasCommandModifier(event)) {
+    event.preventDefault();
+    sendComment();
+  }
+  return true;
+}
+
 function handleItemView(event, key) {
   const detail = viewedDetail();
+
+  if (event.target === elements.vcin) return handleComment(event);
 
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -90,6 +109,11 @@ function handleItemView(event, key) {
   if (key === 's' && detail) {
     event.preventDefault();
     goTo('transitions', { item: detail });
+    return true;
+  }
+  if (key === 'c' && detail) {
+    event.preventDefault();
+    focusComment();
     return true;
   }
   if (hasCommandModifier(event) && key === 'o') {

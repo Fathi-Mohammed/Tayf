@@ -7,6 +7,13 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ### Added
 
+- **Comments, read and written from the overlay.** The task page now shows the five
+  newest comments under the description — author, how long ago, and the text — and
+  `C` jumps to a box at the bottom where `Ctrl+Enter` posts one. The new comment
+  appears in place, so nothing about a quick reply needs a browser tab. They are
+  fetched from the comment endpoint newest-first rather than read off the issue, which
+  is what keeps a task with forty comments from showing its five oldest.
+
 - **A meeting, in one keystroke — `Ctrl+M`.** It opens the ordinary create form with
   every field already answered: the title reads `Meeting`, the start date and the due
   date are today, an hour goes into the estimate, and the board is the last one a task

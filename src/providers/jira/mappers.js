@@ -10,6 +10,7 @@ const BLOCK_SEPARATORS = {
   listItem: '\n'
 };
 const CUSTOM_FIELD = /^customfield_/;
+const RECENT_COMMENTS = 5;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function toWorkItem(issue) {
@@ -93,6 +94,20 @@ function customDateValues(fields) {
   return values;
 }
 
+function toComment(comment) {
+  return {
+    id: (comment && comment.id) || null,
+    author: (comment && comment.author && comment.author.displayName) || '',
+    at: (comment && comment.created) || null,
+    text: documentToText(comment && comment.body).trim()
+  };
+}
+
+function toComments(field) {
+  const comments = ((field && field.comments) || []).slice(-RECENT_COMMENTS).map(toComment);
+  return { comments, commentTotal: Number(field && field.total) || comments.length };
+}
+
 function toWorkItemDetail(issue) {
   const fields = issue.fields || {};
   return {
@@ -101,7 +116,8 @@ function toWorkItemDetail(issue) {
     labels: fields.labels || [],
     typeId: (fields.issuetype && fields.issuetype.id) || null,
     optionValues: customOptionValues(fields),
-    dateValues: customDateValues(fields)
+    dateValues: customDateValues(fields),
+    ...toComments(fields.comment)
   };
 }
 
@@ -127,8 +143,10 @@ function toTransition(transition) {
 }
 
 module.exports = {
+  RECENT_COMMENTS,
   toWorkItem,
   toWorkItemDetail,
+  toComment,
   toTransition,
   documentToText,
   textToDocument

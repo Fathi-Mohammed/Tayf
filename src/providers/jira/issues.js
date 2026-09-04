@@ -1,6 +1,13 @@
 'use strict';
 
-const { toWorkItem, toWorkItemDetail, toTransition, textToDocument } = require('./mappers');
+const {
+  RECENT_COMMENTS,
+  toWorkItem,
+  toWorkItemDetail,
+  toComment,
+  toTransition,
+  textToDocument
+} = require('./mappers');
 
 const ASSIGNED_AND_OPEN =
   'assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC';
@@ -38,9 +45,21 @@ async function fetchAssignedItems(client) {
   }
 }
 
+async function fetchComments(client, key) {
+  const page = await client.get(
+    `/rest/api/3/issue/${encodeURIComponent(key)}/comment` +
+      `?orderBy=-created&maxResults=${RECENT_COMMENTS}`
+  );
+  const comments = (page.comments || []).map(toComment).reverse();
+  return { comments, commentTotal: Number(page.total) || comments.length };
+}
+
 async function fetchItem(client, key) {
-  const issue = await client.get(`/rest/api/3/issue/${encodeURIComponent(key)}`);
-  return toWorkItemDetail(issue);
+  const [issue, recent] = await Promise.all([
+    client.get(`/rest/api/3/issue/${encodeURIComponent(key)}`),
+    fetchComments(client, key).catch(() => null)
+  ]);
+  return { ...toWorkItemDetail(issue), ...(recent || {}) };
 }
 
 async function updateItem(client, key, fields) {
@@ -49,6 +68,14 @@ async function updateItem(client, key, fields) {
     payload.description = textToDocument(payload.description);
   }
   await client.put(`/rest/api/3/issue/${encodeURIComponent(key)}`, { fields: payload });
+}
+
+async function addComment(client, key, text) {
+  const body = textToDocument(text);
+  const created = await client.post(`/rest/api/3/issue/${encodeURIComponent(key)}/comment`, {
+    body
+  });
+  return toComment(created);
 }
 
 async function fetchTransitions(client, key) {
@@ -111,6 +138,7 @@ module.exports = {
   fetchAssignedItems,
   fetchItem,
   updateItem,
+  addComment,
   fetchTransitions,
   applyTransition,
   logWork,

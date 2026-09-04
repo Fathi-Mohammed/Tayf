@@ -1,12 +1,65 @@
 import elements from '../elements.js';
 import { state } from '../state.js';
-import { showLayout, paintBanners, setContext, setFooterMeta } from '../chrome.js';
-import { escapeHtml } from '../format.js';
+import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
+import { escapeHtml, relativeTime } from '../format.js';
 
-const context = { detail: null, requestId: 0 };
+const context = { detail: null, requestId: 0, sending: false };
 
 export function currentDetail() {
   return context.detail;
+}
+
+function commentHtml(comment) {
+  const when = comment.at ? relativeTime(Date.parse(comment.at)) : '';
+  const line = [comment.author, when].filter(Boolean).join('  ·  ');
+  return `<div class="vcom"><b>${escapeHtml(line)}</b><span>${escapeHtml(comment.text)}</span></div>`;
+}
+
+function renderComments(detail) {
+  if (!detail) {
+    elements.vcomments.innerHTML = '';
+    return;
+  }
+
+  const comments = detail.comments || [];
+  const older = (detail.commentTotal || comments.length) - comments.length;
+
+  const caption = comments.length
+    ? older > 0
+      ? `فيه ${older} كومنت أقدم في جيرا`
+      : ''
+    : 'مفيش كومنتات لسه';
+
+  elements.vcomments.innerHTML =
+    (caption ? `<div class="vcold">${escapeHtml(caption)}</div>` : '') +
+    comments.map(commentHtml).join('');
+}
+
+export function focusComment() {
+  elements.vcin.focus();
+}
+
+export async function sendComment() {
+  const { detail } = context;
+  const text = elements.vcin.value.trim();
+  if (!detail || !text || context.sending) return;
+
+  context.sending = true;
+  setFlash('بيبعت الكومنت…', 'pending');
+  const response = await window.tayf.comment({ key: detail.key, text });
+  context.sending = false;
+  if (context.detail !== detail) return;
+
+  if (response.error) {
+    setFlash('', '');
+    return;
+  }
+
+  elements.vcin.value = '';
+  detail.comments = [...(detail.comments || []), response.comment];
+  detail.commentTotal = (detail.commentTotal || 0) + 1;
+  renderComments(detail);
+  setFlash(`اتبعت كومنت · <b>${escapeHtml(detail.key)}</b>`, 'done');
 }
 
 function metaEntries(item, detail) {
@@ -40,6 +93,8 @@ export const itemViewScreen = {
     elements.vmeta.innerHTML = '';
     elements.vdesc.textContent = 'بيحمّل…';
     elements.vdesc.className = 'empty';
+    elements.vcin.value = '';
+    renderComments(null);
     setFooterMeta('metav', item.key);
 
     this.render();
@@ -71,11 +126,15 @@ export const itemViewScreen = {
       elements.vdesc.textContent = 'مفيش وصف للتاسك دي.';
       elements.vdesc.className = 'empty';
     }
+
+    renderComments(detail);
   },
 
   leave() {
     context.requestId += 1;
     context.detail = null;
+    elements.vcin.value = '';
+    renderComments(null);
   },
 
   render() {

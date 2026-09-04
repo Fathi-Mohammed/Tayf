@@ -34,6 +34,10 @@ type. If you want to be specific: board · type · assignee · due date · estim
 description. The due date field understands `today`, `tomorrow`, weekday names,
 `+3`, and plain dates; a bare number in the estimate field means minutes.
 
+**On the task page** (`Enter` on any task): the description and the five newest comments.
+`C` jumps to the comment box; `Ctrl+Enter` posts it and it appears below straight away,
+without opening Jira.
+
 **A meeting, quickly:** `Ctrl+M` from the list opens that same form already filled in —
 title `Meeting`, start and due date today, an hour of estimate, and the last board you
 sent a task to. They are ordinary fields, so change whatever you like; they are only
