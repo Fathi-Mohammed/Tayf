@@ -314,6 +314,12 @@ export function installKeyboard() {
       return;
     }
 
+    if (hasCommandModifier(event) && key === 'm') {
+      event.preventDefault();
+      goTo('compose', { intent: 'create', preset: 'meeting' });
+      return;
+    }
+
     if (pickerIsOpen()) {
       handleBoardPicker(event);
       return;
