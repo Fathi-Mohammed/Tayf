@@ -428,11 +428,19 @@
   .project-toggle:not(:first-child) { border-top: 1px solid var(--line); }
   .project-toggle:hover { background: var(--hover); }
   .project-chevron {
-    width: 12px; flex: none; color: var(--accent); font-size: var(--fs-title3);
-    line-height: 1; text-align: center;
+    position: relative; width: 12px; height: 12px; flex: none;
   }
-  .project-chevron::before { content: '‹'; }
-  .project-toggle[aria-expanded="true"] .project-chevron::before { content: '⌄'; }
+  .project-chevron::before {
+    content: ''; position: absolute; width: 6px; height: 6px;
+    inset-block-start: 2px; inset-inline-start: 1px;
+    border-right: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    transform: rotate(45deg);
+    transform-origin: center;
+  }
+  .project-toggle[aria-expanded="false"] .project-chevron::before {
+    transform: rotate(135deg);
+  }
   .project-name {
     min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     font-size: var(--fs-body); font-weight: 650;
