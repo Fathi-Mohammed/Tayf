@@ -1,3 +1,53 @@
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-ExtraLight.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-Light.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-Heavy.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Ping AR LT";
+  src: url("../../assets/fonts/PingARLT-Black.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
 :root {
     color-scheme: dark;
 
@@ -55,8 +105,7 @@
     --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
   }
 
-  @media (prefers-color-scheme: light) {
-    :root {
+:root[data-color-mode="light"] {
       color-scheme: light;
 
       --scrim:       rgba(250,250,252,.55);
@@ -108,8 +157,100 @@
       --ty-bug:   #b3261e;  --ty-bug-bg:   rgba(198,40,40,.10);
       --ty-story: #256b49;  --ty-story-bg: rgba(46,131,89,.10);
       --ty-epic:  #5a34b8;  --ty-epic-bg:  rgba(107,63,212,.12);
-    }
-  }
+}
+
+:root[data-color-mode="dark"] { color-scheme: dark; }
+:root[data-font="ping-ar"] { --sans: "Ping AR LT", "Segoe UI", system-ui, sans-serif; }
+
+:root[data-theme] {
+  --line:     color-mix(in srgb, var(--text) 9%, transparent);
+  --fill:     color-mix(in srgb, var(--text) 5%, transparent);
+  --fill-2:   color-mix(in srgb, var(--text) 8%, transparent);
+  --fill-3:   color-mix(in srgb, var(--text) 6%, transparent);
+  --hover:    color-mix(in srgb, var(--text) 4%, transparent);
+  --rail:     color-mix(in srgb, var(--text) 13%, transparent);
+  --scroll:   color-mix(in srgb, var(--text) 14%, transparent);
+  --scroll-2: color-mix(in srgb, var(--text) 18%, transparent);
+  --accent-bg:   color-mix(in srgb, var(--accent) 11%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent) 48%, transparent);
+  --accent-soft: color-mix(in srgb, var(--accent) 7%, transparent);
+  --accent-dim:  color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+:root[data-color-mode="dark"][data-theme="tokyo-night"] {
+  --scrim: rgba(8, 9, 15, .58); --scrim-solid: #10111a;
+  --panel: #1a1b26; --elev: #24283b; --elev-2: #1f2335;
+  --text: #c0caf5; --text-2: #a9b1d6; --text-3: #9aa5ce;
+  --muted: #7f849c; --dim: #565f89; --accent: #7aa2f7;
+  --st-work: #7dcfff; --st-work-txt: #9ad8ff;
+}
+:root[data-color-mode="light"][data-theme="tokyo-night"] {
+  --scrim: rgba(225, 228, 242, .62); --scrim-solid: #dfe3f2;
+  --panel: #f5f6fb; --elev: #ffffff; --elev-2: #eef0f8;
+  --text: #343b58; --text-2: #414868; --text-3: #565f89;
+  --muted: #6b7089; --dim: #8b91a7; --accent: #345bd6;
+  --st-work: #007aa4; --st-work-txt: #007aa4;
+}
+
+:root[data-color-mode="dark"][data-theme="one-dark-pro"] {
+  --scrim: rgba(10, 11, 13, .58); --scrim-solid: #17191d;
+  --panel: #21252b; --elev: #282c34; --elev-2: #2c313a;
+  --text: #abb2bf; --text-2: #c8ccd4; --text-3: #9da5b4;
+  --muted: #7f848e; --dim: #5c6370; --accent: #61afef;
+  --st-work: #56b6c2; --st-work-txt: #78cbd4;
+}
+:root[data-color-mode="light"][data-theme="one-dark-pro"] {
+  --scrim: rgba(230, 231, 233, .62); --scrim-solid: #e3e5e8;
+  --panel: #f6f7f8; --elev: #ffffff; --elev-2: #eceef1;
+  --text: #383a42; --text-2: #41434c; --text-3: #59626f;
+  --muted: #686b75; --dim: #9295a0; --accent: #4078f2;
+  --st-work: #0184bc; --st-work-txt: #0184bc;
+}
+
+:root[data-color-mode="dark"][data-theme="dracula"] {
+  --scrim: rgba(10, 9, 16, .6); --scrim-solid: #181620;
+  --panel: #282a36; --elev: #343746; --elev-2: #30323f;
+  --text: #f8f8f2; --text-2: #e6e6df; --text-3: #c8c8c2;
+  --muted: #a6a6ad; --dim: #73758b; --accent: #bd93f9;
+  --st-work: #8be9fd; --st-work-txt: #8be9fd;
+}
+:root[data-color-mode="light"][data-theme="dracula"] {
+  --scrim: rgba(237, 232, 244, .64); --scrim-solid: #ebe5f1;
+  --panel: #fbf9fd; --elev: #ffffff; --elev-2: #f2edf7;
+  --text: #3d3447; --text-2: #4e4259; --text-3: #65586f;
+  --muted: #746a7c; --dim: #9a91a2; --accent: #7c3fc4;
+  --st-work: #087d92; --st-work-txt: #087d92;
+}
+
+:root[data-color-mode="dark"][data-theme="nord"] {
+  --scrim: rgba(12, 16, 23, .59); --scrim-solid: #242b38;
+  --panel: #2e3440; --elev: #3b4252; --elev-2: #353c49;
+  --text: #eceff4; --text-2: #e5e9f0; --text-3: #d8dee9;
+  --muted: #a5adba; --dim: #7b8494; --accent: #88c0d0;
+  --st-work: #81a1c1; --st-work-txt: #9bb7d2;
+}
+:root[data-color-mode="light"][data-theme="nord"] {
+  --scrim: rgba(226, 231, 237, .64); --scrim-solid: #e0e6ec;
+  --panel: #f5f7fa; --elev: #ffffff; --elev-2: #e9eef3;
+  --text: #2e3440; --text-2: #3b4252; --text-3: #4c566a;
+  --muted: #596579; --dim: #8792a3; --accent: #397e91;
+  --st-work: #4c6f91; --st-work-txt: #4c6f91;
+}
+
+:root[data-color-mode="dark"][data-theme="github"] {
+  --scrim: rgba(1, 4, 9, .62); --scrim-solid: #090c10;
+  --panel: #0d1117; --elev: #161b22; --elev-2: #1c2128;
+  --text: #f0f6fc; --text-2: #c9d1d9; --text-3: #b1bac4;
+  --muted: #8b949e; --dim: #6e7681; --accent: #58a6ff;
+  --st-work: #58a6ff; --st-work-txt: #79b8ff;
+}
+:root[data-color-mode="light"][data-theme="github"] {
+  --scrim: rgba(246, 248, 250, .67); --scrim-solid: #eaeef2;
+  --panel: #ffffff; --elev: #f6f8fa; --elev-2: #eef1f4;
+  --text: #1f2328; --text-2: #30363d; --text-3: #424a53;
+  --muted: #59636e; --dim: #818b98; --accent: #0969da;
+  --st-work: #0969da; --st-work-txt: #0969da;
+}
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: transparent; overflow: hidden; }
   body { font-family: var(--sans); color: var(--text); user-select: none; cursor: default; }
@@ -331,6 +472,93 @@
   .sstat:hover { color: var(--text); }
   .sstat.on { background: var(--accent-bg); border-color: var(--accent-line); color: var(--accent); }
   .sstatnote { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  .sappearance-block { padding: 14px 0; border-top: 1px solid var(--line); }
+  .sthemes {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px; margin-top: 10px;
+  }
+  .stheme-card {
+    position: relative; min-width: 0; display: flex; align-items: center; gap: 10px;
+    padding: 9px; text-align: start;
+    color: var(--text-2); background: var(--fill); border: 1px solid var(--line);
+    border-radius: 7px; outline: none; cursor: pointer; font-family: var(--sans);
+  }
+  .stheme-card:hover { background: var(--hover); border-color: var(--fill-2); }
+  .stheme-card:focus-visible { border-color: var(--accent-line); }
+  .stheme-card.on { background: var(--accent-soft); border-color: var(--accent-line); }
+  .stheme-preview {
+    direction: ltr; flex: 0 0 48px; height: 42px; display: flex; align-items: flex-end; gap: 3px;
+    padding: 7px; overflow: hidden; border-radius: 5px; background: var(--preview-bg);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .stheme-preview i { display: block; width: 5px; border-radius: 3px; }
+  .stheme-preview i:nth-child(1) { height: 13px; background: var(--preview-1); }
+  .stheme-preview i:nth-child(2) { height: 25px; background: var(--preview-2); }
+  .stheme-preview i:nth-child(3) { height: 18px; background: var(--preview-3); }
+  .stheme-preview i:nth-child(4) { height: 29px; background: var(--preview-4); }
+  .stheme-preview i:nth-child(5) { height: 21px; background: var(--preview-5); }
+  .stheme-card[data-theme="tokyo-night"] .stheme-preview {
+    --preview-bg: #1a1b26; --preview-1: #7aa2f7; --preview-2: #bb9af7;
+    --preview-3: #7dcfff; --preview-4: #9ece6a; --preview-5: #f7768e;
+  }
+  .stheme-card[data-theme="one-dark-pro"] .stheme-preview {
+    --preview-bg: #282c34; --preview-1: #61afef; --preview-2: #c678dd;
+    --preview-3: #56b6c2; --preview-4: #98c379; --preview-5: #e06c75;
+  }
+  .stheme-card[data-theme="dracula"] .stheme-preview {
+    --preview-bg: #282a36; --preview-1: #bd93f9; --preview-2: #ff79c6;
+    --preview-3: #8be9fd; --preview-4: #50fa7b; --preview-5: #ff5555;
+  }
+  .stheme-card[data-theme="nord"] .stheme-preview {
+    --preview-bg: #2e3440; --preview-1: #81a1c1; --preview-2: #b48ead;
+    --preview-3: #88c0d0; --preview-4: #a3be8c; --preview-5: #bf616a;
+  }
+  .stheme-card[data-theme="github"] .stheme-preview {
+    --preview-bg: #0d1117; --preview-1: #58a6ff; --preview-2: #bc8cff;
+    --preview-3: #79c0ff; --preview-4: #56d364; --preview-5: #ff7b72;
+  }
+  .stheme-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .stheme-copy b { overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+  .stheme-copy small { color: var(--muted); font-size: 10.5px; line-height: 1.35; }
+  .stheme-check {
+    position: absolute; top: 6px; inset-inline-end: 6px;
+    width: 16px; height: 16px; display: none; place-items: center;
+    color: var(--panel); background: var(--accent); border-radius: 50%;
+    font: 700 10px/1 var(--sans);
+  }
+  .stheme-card.on .stheme-check { display: grid; }
+
+  .ssegments {
+    direction: rtl; flex: 0 0 260px; display: grid; grid-template-columns: repeat(3, 1fr);
+    padding: 3px; background: var(--fill); border: 1px solid var(--line); border-radius: 7px;
+  }
+  .ssegments button {
+    padding: 6px 8px; color: var(--muted); background: transparent; border: 0;
+    border-radius: 5px; outline: none; cursor: pointer; font: 500 11.5px/1.4 var(--sans);
+  }
+  .ssegments button:hover { color: var(--text); }
+  .ssegments button:focus-visible { box-shadow: inset 0 0 0 1px var(--accent-line); }
+  .ssegments button.on { color: var(--text); background: var(--elev); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
+
+  .sfont-block { border-bottom: 0; }
+  .sfonts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 10px; }
+  .sfonts button {
+    min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 11px; text-align: start; color: var(--text-2); background: var(--fill);
+    border: 1px solid var(--line); border-radius: 7px; outline: none; cursor: pointer;
+    font-family: var(--sans);
+  }
+  .sfonts button:hover { background: var(--hover); }
+  .sfonts button:focus-visible, .sfonts button.on { border-color: var(--accent-line); }
+  .sfonts button.on { background: var(--accent-soft); }
+  .sfonts button > span { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .sfonts button b { font-size: 11.5px; font-weight: 600; }
+  .sfonts button small { color: var(--muted); font-size: 10px; }
+  .sfonts button i { direction: ltr; flex: none; color: var(--accent); font: normal 16px/1 var(--sans); }
+  .sfonts button[data-font="ping-ar"],
+  .sfonts button[data-font="ping-ar"] i { font-family: "Ping AR LT", sans-serif; }
+
   #snote { min-height: 18px; padding: 14px 2px 2px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
   #snote.bad { color: var(--bad); }
   #snote.good { color: var(--good); }

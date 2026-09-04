@@ -8,6 +8,7 @@ import { transitionFormScreen } from './screens/transition-form.js';
 import { composeScreen } from './screens/compose.js';
 import { itemViewScreen } from './screens/item-view.js';
 import { settingsScreen } from './screens/settings.js';
+import { applyAppearance } from './appearance.js';
 
 const OPEN_SCREEN = {
   settings: () => goTo('settings'),
@@ -53,6 +54,8 @@ window.tayf.onShown((payload) => {
 
 relabelForMac();
 installKeyboard();
+
+window.tayf.readPreferences().then((preferences) => applyAppearance(preferences.appearance));
 
 window.tayf.state().then((next) => {
   setWorkspace(next);

@@ -1,9 +1,10 @@
 const IDS = [
   'backdrop', 'panel', 'bar', 'prompt', 'search',
   'banner', 'fail', 'ok', 'filters', 'ctx', 'list', 'msg',
-  'settings', 'snav', 'pconn', 'pnudge', 'pgen', 'tokenlink',
+  'settings', 'snav', 'pconn', 'pnudge', 'pgen', 'pappearance', 'tokenlink',
   'ssite', 'semail', 'stoken', 'snote',
   'shotkey', 'saddkey', 'sauto', 'sautotext',
+  'sthemes', 'smodes', 'sfonts',
   'snudge', 'snudgeevery', 'snudgeidle', 'snudgestart', 'snudgeend', 'snudgedays',
   'snudgecheck', 'snudgecheckevery', 'snudgeoverdue', 'snudgeoverduedays', 'snudgestatuses',
   'view', 'vtitle', 'vmeta', 'vdesc',

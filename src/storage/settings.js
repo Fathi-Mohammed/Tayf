@@ -21,7 +21,10 @@ const DEFAULTS = {
   lastBoardId: null,
   lastProjectKey: null,
   lastIssueTypeId: null,
-  lastOptionFieldsByProject: {}
+  lastOptionFieldsByProject: {},
+  appearanceTheme: 'tokyo-night',
+  appearanceMode: 'system',
+  appearanceFont: 'system'
 };
 
 const NUDGE_KEYS = {

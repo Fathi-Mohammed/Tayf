@@ -21,6 +21,31 @@ const { NOTIFICATION_TEXT } = require('../strings');
 
 const REFRESH_INTERVAL_MS = 60_000;
 const OPEN_TIME_BUDGET_MS = 500;
+const APPEARANCE_CHOICES = {
+  appearanceTheme: ['tokyo-night', 'one-dark-pro', 'dracula', 'nord', 'github'],
+  appearanceMode: ['system', 'dark', 'light'],
+  appearanceFont: ['system', 'ping-ar']
+};
+
+function readAppearance(settings) {
+  return {
+    theme: settings.get('appearanceTheme'),
+    mode: settings.get('appearanceMode'),
+    font: settings.get('appearanceFont')
+  };
+}
+
+function storedAppearance(patch) {
+  const candidates = {
+    appearanceTheme: patch.theme,
+    appearanceMode: patch.mode,
+    appearanceFont: patch.font
+  };
+
+  return Object.fromEntries(
+    Object.entries(candidates).filter(([key, value]) => APPEARANCE_CHOICES[key].includes(value))
+  );
+}
 
 function readNudges(settings) {
   return Object.fromEntries(
@@ -108,13 +133,15 @@ function start() {
       toggleChoices: hotkeyChoices(platform.toggleHotkeys),
       composeChoices: hotkeyChoices(platform.composeHotkeys),
       autoStart: autostart.isEnabled(),
-      nudges: readNudges(settings)
+      nudges: readNudges(settings),
+      appearance: readAppearance(settings)
     }),
     savePreferences: (patch) => {
       if (patch.toggleHotkey) hotkeys.choose(patch.toggleHotkey);
       if (patch.composeHotkey) hotkeys.chooseCompose(patch.composeHotkey);
       if (typeof patch.autoStart === 'boolean') autostart.setEnabled(patch.autoStart);
       if (patch.nudges) settings.remember(storedNudges(patch.nudges));
+      if (patch.appearance) settings.remember(storedAppearance(patch.appearance));
       tray.update();
       return actions.readPreferences();
     },

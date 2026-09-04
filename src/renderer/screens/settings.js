@@ -3,10 +3,11 @@ import { state } from '../state.js';
 import { showLayout, paintBanners, setContext } from '../chrome.js';
 import { escapeHtml } from '../format.js';
 import { backToTaskList } from './task-list.js';
+import { THEMES, applyAppearance, normaliseAppearance } from '../appearance.js';
 
 const CLOSE_DELAY_MS = 900;
-const TABS = ['conn', 'nudge', 'gen'];
-const PANES = { conn: 'pconn', nudge: 'pnudge', gen: 'pgen' };
+const TABS = ['conn', 'nudge', 'gen', 'appearance'];
+const PANES = { conn: 'pconn', nudge: 'pnudge', gen: 'pgen', appearance: 'pappearance' };
 const AUTO_START_HINT = { darwin: 'يفتح لوحده مع الماك.' };
 const DAY_LETTERS = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'];
 const EVERY_CHOICES = [1, 5, 10, 15, 20, 30, 45, 60];
@@ -96,6 +97,38 @@ function paintPreferences(preferences) {
   elements.snudgeoverdue.checked = !!nudges.overdueEnabled;
   fillNumbers(elements.snudgeoverduedays, OVERDUE_CHOICES, nudges.overdueDays, 'يوم');
   paintDays(nudges.workDays || []);
+  paintAppearance(preferences.appearance);
+}
+
+function paintAppearance(appearance) {
+  const selected = applyAppearance(appearance);
+  if (!elements.sthemes.childElementCount) {
+    elements.sthemes.innerHTML = THEMES.map((theme) => `
+      <button type="button" class="stheme-card" data-theme="${theme.id}" role="radio">
+        <span class="stheme-preview" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </span>
+        <span class="stheme-copy"><b>${theme.label}</b><small>${theme.hint}</small></span>
+        <span class="stheme-check" aria-hidden="true">✓</span>
+      </button>`).join('');
+  }
+
+  elements.sthemes.querySelectorAll('[data-theme]').forEach((card) => {
+    const on = card.dataset.theme === selected.theme;
+    card.classList.toggle('on', on);
+    card.setAttribute('aria-checked', String(on));
+  });
+
+  elements.smodes.querySelectorAll('[data-mode]').forEach((button) => {
+    const on = button.dataset.mode === selected.mode;
+    button.classList.toggle('on', on);
+    button.setAttribute('aria-checked', String(on));
+  });
+  elements.sfonts.querySelectorAll('[data-font]').forEach((button) => {
+    const on = button.dataset.font === selected.font;
+    button.classList.toggle('on', on);
+    button.setAttribute('aria-checked', String(on));
+  });
 }
 
 function refused(requested, registered, choices) {
@@ -124,7 +157,7 @@ export function showTab(name) {
     item.classList.toggle('on', item.dataset.t === name)
   );
 
-  const first = elements[PANES[name]].querySelector('input, select');
+  const first = elements[PANES[name]].querySelector('input, select, button');
   if (first) {
     first.focus();
     if (first.select) first.select();
@@ -211,6 +244,42 @@ elements.saddkey.addEventListener('change', () =>
 elements.sauto.addEventListener('change', () =>
   savePreference({ autoStart: elements.sauto.checked })
 );
+
+elements.sthemes.addEventListener('click', (event) => {
+  const card = event.target.closest('[data-theme]');
+  if (!card) return;
+  const current = normaliseAppearance({
+    theme: card.dataset.theme,
+    mode: elements.smodes.querySelector('.on').dataset.mode,
+    font: elements.sfonts.querySelector('.on').dataset.font
+  });
+  paintAppearance(current);
+  savePreference({ appearance: { theme: current.theme } });
+});
+
+elements.smodes.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-mode]');
+  if (!button) return;
+  const current = normaliseAppearance({
+    theme: elements.sthemes.querySelector('.on').dataset.theme,
+    mode: button.dataset.mode,
+    font: elements.sfonts.querySelector('.on').dataset.font
+  });
+  paintAppearance(current);
+  savePreference({ appearance: { mode: current.mode } });
+});
+
+elements.sfonts.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-font]');
+  if (!button) return;
+  const current = normaliseAppearance({
+    theme: elements.sthemes.querySelector('.on').dataset.theme,
+    mode: elements.smodes.querySelector('.on').dataset.mode,
+    font: button.dataset.font
+  });
+  paintAppearance(current);
+  savePreference({ appearance: { font: current.font } });
+});
 
 const saveNudge = (patch) => savePreference({ nudges: patch });
 

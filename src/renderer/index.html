@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'" />
 <title>Tayf</title>
 <link rel="stylesheet" href="styles.css" />
 <script type="module" src="app.js"></script>
@@ -52,6 +52,15 @@
               <circle cx="10.5" cy="10.5" r="1.6" fill="currentColor" stroke="none" />
             </svg>
             <span>عام</span>
+          </div>
+          <div class="snavitem" data-t="appearance">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2.2a5.8 5.8 0 1 0 0 11.6h.8a1.3 1.3 0 0 0 0-2.6h-.5a1.1 1.1 0 0 1 0-2.2h1.4A4.1 4.1 0 0 0 13.8 5 2.8 2.8 0 0 0 11 2.2H8Z" />
+              <circle cx="5.2" cy="5.4" r=".65" fill="currentColor" stroke="none" />
+              <circle cx="8" cy="4.3" r=".65" fill="currentColor" stroke="none" />
+              <circle cx="10.8" cy="5.5" r=".65" fill="currentColor" stroke="none" />
+            </svg>
+            <span>المظهر</span>
           </div>
         </div>
 
@@ -211,6 +220,42 @@
             </div>
           </div>
 
+          <div id="pappearance" class="spane">
+            <div class="ssection">المظهر</div>
+            <div class="sintro">اختار الثيم والإضاءة والخط. التغيير بيظهر فوراً وبيتحفظ تلقائي.</div>
+
+            <div class="sappearance-block">
+              <div class="stitle">الثيم</div>
+              <div class="shint">خمس ثيمات مستوحاة من الأكثر شهرة في VS Code.</div>
+              <div id="sthemes" class="sthemes" role="radiogroup" aria-label="الثيم"></div>
+            </div>
+
+            <div class="srow">
+              <div class="scell">
+                <div class="stitle" id="smodes-label">الإضاءة</div>
+                <div class="shint">النظام بيتابع إعداد جهازك.</div>
+              </div>
+              <div id="smodes" class="ssegments" role="radiogroup" aria-labelledby="smodes-label">
+                <button type="button" data-mode="system" role="radio">النظام</button>
+                <button type="button" data-mode="dark" role="radio">غامق</button>
+                <button type="button" data-mode="light" role="radio">فاتح</button>
+              </div>
+            </div>
+
+            <div class="sappearance-block sfont-block">
+              <div class="stitle" id="sfonts-label">الخط</div>
+              <div class="shint">اختار خط الواجهة اللي يريّحك.</div>
+              <div id="sfonts" class="sfonts" role="radiogroup" aria-labelledby="sfonts-label">
+                <button type="button" data-font="system" role="radio">
+                  <span><b>خط النظام</b><small>الافتراضي لجهازك</small></span><i>Ab أب</i>
+                </button>
+                <button type="button" data-font="ping-ar" role="radio">
+                  <span><b>Ping AR LT</b><small>الخط المرفق مع طيف</small></span><i>Ab أب</i>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div id="snote"></div>
         </div>
       </div>
@@ -278,7 +323,7 @@
     </div>
     <div id="foots">
       <span><kbd>Tab</kbd> تنقل</span>
-      <span><kbd>Ctrl 1-3</kbd> الأقسام</span>
+      <span><kbd>Ctrl 1-4</kbd> الأقسام</span>
       <span><kbd>Enter</kbd> احفظ واتأكد</span>
       <span><kbd>Esc</kbd> اقفل</span>
       <span id="metas"></span>
