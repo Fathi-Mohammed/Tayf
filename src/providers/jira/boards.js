@@ -139,7 +139,8 @@ async function mapItemsToBoards(client, allBoards, projectKeys) {
       boardsByItemKey[key].push({
         id: board.id,
         name: board.name,
-        projectKey: board.projectKey
+        projectKey: board.projectKey,
+        projectName: board.projectName
       });
     });
   });

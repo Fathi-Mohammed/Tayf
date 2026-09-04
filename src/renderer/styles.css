@@ -419,6 +419,29 @@
   #list::-webkit-scrollbar { width: var(--sp-4); }
   #list::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: var(--r-3); }
 
+  .project-toggle {
+    width: 100%; display: flex; align-items: center; gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-7); border: 0; border-bottom: 1px solid var(--line);
+    background: var(--fill); color: var(--text); font-family: var(--sans);
+    text-align: start; cursor: pointer;
+  }
+  .project-toggle:not(:first-child) { border-top: 1px solid var(--line); }
+  .project-toggle:hover { background: var(--hover); }
+  .project-chevron {
+    width: 12px; flex: none; color: var(--accent); font-size: var(--fs-title3);
+    line-height: 1; text-align: center;
+  }
+  .project-chevron::before { content: '‹'; }
+  .project-toggle[aria-expanded="true"] .project-chevron::before { content: '⌄'; }
+  .project-name {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: var(--fs-body); font-weight: 650;
+  }
+  .project-key, .project-count {
+    font-family: var(--mono); font-size: var(--fs-footnote); color: var(--dim);
+  }
+  .project-count { margin-inline-start: auto; }
+
   .row {
     display: flex; align-items: center; gap: var(--sp-6);
     padding-block: var(--sp-5); padding-inline: 0 var(--sp-7);

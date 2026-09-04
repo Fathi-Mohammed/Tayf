@@ -20,7 +20,7 @@ const RAW_ISSUE = {
   key: 'FPE-12',
   fields: {
     summary: 'Fix the login screen',
-    project: { key: 'FPE' },
+    project: { key: 'FPE', name: 'Frontend Platform' },
     status: { name: 'In Progress', statusCategory: { key: 'indeterminate' } },
     issuetype: { id: '10004', name: 'Bug', subtask: false },
     priority: { name: 'High' },
@@ -47,6 +47,7 @@ test('toWorkItem maps Jira shapes onto neutral names', () => {
   const item = toWorkItem(RAW_ISSUE);
   assert.equal(item.key, 'FPE-12');
   assert.equal(item.projectKey, 'FPE');
+  assert.equal(item.projectName, 'Frontend Platform');
   assert.equal(item.title, 'Fix the login screen');
   assert.equal(item.status, 'In Progress');
   assert.equal(item.category, 'indeterminate');

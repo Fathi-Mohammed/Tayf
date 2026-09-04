@@ -21,6 +21,7 @@ function toWorkItem(issue) {
   return {
     key: issue.key,
     projectKey: (fields.project && fields.project.key) || null,
+    projectName: (fields.project && fields.project.name) || null,
     title: fields.summary || '',
     status: status.name || null,
     category: (status.statusCategory && status.statusCategory.key) || 'new',

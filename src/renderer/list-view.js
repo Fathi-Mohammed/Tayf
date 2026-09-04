@@ -49,7 +49,7 @@ export function paintRows(rows, emptyMessage, rowHtml) {
     .map((row, index) => rowHtml(row, index, index === state.selectedIndex))
     .join('');
 
-  const selected = elements.list.children[state.selectedIndex];
+  const selected = elements.list.querySelector('.row.on');
   if (selected && selected.scrollIntoView) selected.scrollIntoView({ block: 'nearest' });
 }
 

@@ -42,7 +42,7 @@ function draw() {
 }
 
 function place() {
-  const row = elements.list.children[state.selectedIndex];
+  const row = elements.list.querySelector('.row.on');
   const panel = elements.panel.getBoundingClientRect();
   const anchor = row ? row.getBoundingClientRect() : panel;
   const width = elements.actions.offsetWidth || FALLBACK_WIDTH;
