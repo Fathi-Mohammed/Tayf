@@ -13,6 +13,15 @@ import {
 } from '../field-rows.js';
 import { backToTaskList } from './task-list.js';
 
+const PRESETS = {
+  meeting: {
+    title: 'Meeting',
+    placeholder: 'عنوان الاجتماع',
+    due: 'النهاردة',
+    estimate: '1h'
+  }
+};
+
 const context = {
   intent: 'create',
   boards: [],
@@ -328,7 +337,7 @@ export function setDueDate(text) {
   elements.cdue.focus();
 }
 
-async function enterCreate(prefillTitle) {
+async function enterCreate(prefillTitle, preset) {
   context.intent = 'create';
   context.detail = null;
   ensureRows();
@@ -338,8 +347,11 @@ async function enterCreate(prefillTitle) {
   setRow(elements.cboardwrap, elements.lblboard, true);
   setRow(elements.ctype, elements.lbltype, true);
   elements.cdescin.value = '';
-  elements.search.placeholder = 'عنوان التاسك الجديدة';
-  if (prefillTitle !== undefined) elements.search.value = prefillTitle;
+  elements.cdue.value = preset ? preset.due : '';
+  elements.cest.value = preset ? preset.estimate : '';
+  elements.search.placeholder = preset ? preset.placeholder : 'عنوان التاسك الجديدة';
+  if (preset) elements.search.value = preset.title;
+  else if (prefillTitle !== undefined) elements.search.value = prefillTitle;
 
   composeScreen.render();
   elements.search.focus();
@@ -347,7 +359,10 @@ async function enterCreate(prefillTitle) {
 
   if (!context.boards.length) await loadBoards();
   else if (!context.requirements) await onBoardChange();
-  else showRequirements();
+  else {
+    await loadCreateFields();
+    showRequirements();
+  }
 }
 
 async function enterEdit(item) {
@@ -418,8 +433,8 @@ async function enterEdit(item) {
 export const composeScreen = {
   name: 'compose',
 
-  enter({ intent, item, prefillTitle }) {
-    return intent === 'edit' ? enterEdit(item) : enterCreate(prefillTitle);
+  enter({ intent, item, prefillTitle, preset }) {
+    return intent === 'edit' ? enterEdit(item) : enterCreate(prefillTitle, PRESETS[preset]);
   },
 
   leave() {

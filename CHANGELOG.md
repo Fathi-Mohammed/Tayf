@@ -3,6 +3,31 @@
 Notable changes to Tayf. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
+## [Unreleased]
+
+### Added
+
+- **A meeting, in one keystroke — `Ctrl+M`.** It opens the ordinary create form with
+  every field already answered: the title reads `Meeting`, the start date and the due
+  date are today, an hour goes into the estimate, and the board is the last one a task
+  was created on. Nothing is locked — they are the same inputs as always, only filled
+  in — so a meeting that ate an hour is `Ctrl+Space`, `Ctrl+M`, `Enter`.
+
+- Electron's default menu is replaced with an Edit-only one, plus the application menu
+  on macOS. The default menu bound `Ctrl+M` to Minimize — a frameless overlay that
+  minimises is a lost overlay — along with `Ctrl+R` reload and `Ctrl+W` close, neither
+  of which an overlay has any use for. Cut, copy, paste and select-all keep their
+  roles, which is where macOS gets those keys from.
+
+### Fixed
+
+- Leaving the create form and coming back to it lost the custom date and option rows.
+  They are cleared on the way out but were only redrawn when the board or the type
+  changed, so a second visit had none of them. They are redrawn on the way in now.
+
+- The due date and the estimate no longer survive from one create form to the next.
+  The fields were never cleared, so yesterday's date could ride along into a new task.
+
 ## [0.8.0] - 2026-09-05
 
 ### Added

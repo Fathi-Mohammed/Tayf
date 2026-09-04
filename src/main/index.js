@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, Notification } = require('electron');
+const { app, Menu, Notification } = require('electron');
 
 const platform = require('./platform');
 const autostart = require('./autostart');
@@ -36,6 +36,11 @@ function storedNudges(patch) {
   );
 }
 
+function applicationMenu() {
+  const roles = platform.isMac ? ['appMenu', 'editMenu'] : ['editMenu'];
+  return Menu.buildFromTemplate(roles.map((role) => ({ role })));
+}
+
 function hotkeyChoices(accelerators) {
   return accelerators.map((accelerator) => ({
     accelerator,
@@ -51,6 +56,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 function start() {
+  Menu.setApplicationMenu(applicationMenu());
+
   const settings = createSettings();
   const workspace = new Workspace({
     cache: { read: cache.readCache, write: cache.writeCache },
