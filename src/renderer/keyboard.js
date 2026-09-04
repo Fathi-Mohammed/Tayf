@@ -4,7 +4,12 @@ import { goTo, activeScreenName, repaint } from './navigation.js';
 import { moveSelection } from './list-view.js';
 import { setFlash } from './chrome.js';
 import { QUICK_DATES } from './dates.js';
-import { FILTERS, setFilter, backToTaskList } from './screens/task-list.js';
+import {
+  FILTERS,
+  setFilter,
+  backToTaskList,
+  collapseSelectedProject
+} from './screens/task-list.js';
 import { transitionContext, chooseTransition } from './screens/transitions.js';
 import { submit as submitTransitionForm, copyEstimateIntoWorklog } from './screens/transition-form.js';
 import { submit as submitCompose, currentDetail as composeDetail, isEditing } from './screens/compose.js';
@@ -181,6 +186,13 @@ function handleActionMenu(event, key) {
 
 function handleList(event, key, screen) {
   const onTaskList = screen === 'tasks';
+
+  if (onTaskList && event.shiftKey && event.key === 'ArrowLeft') {
+    event.preventDefault();
+    closeMenu();
+    collapseSelectedProject();
+    return true;
+  }
 
   if (onTaskList && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
     event.preventDefault();

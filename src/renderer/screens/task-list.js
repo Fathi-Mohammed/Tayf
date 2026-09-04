@@ -5,7 +5,7 @@ import { showLayout, setContext, paintBanners, setFooterMeta, itemCountMeta } fr
 import { itemRowHtml } from '../list-view.js';
 import { toIsoDate } from '../dates.js';
 import { escapeHtml } from '../format.js';
-import { groupItemsByProject } from '../project-groups.js';
+import { groupItemsByProject, projectKey } from '../project-groups.js';
 
 const SETUP_STEPS =
   '<h3>وصّلها بـ Jira بتاعك</h3>' +
@@ -137,6 +137,16 @@ export const taskListScreen = {
     setFooterMeta('meta', itemCountMeta());
   }
 };
+
+export function collapseSelectedProject() {
+  const item = state.rows[state.selectedIndex];
+  if (!item) return false;
+
+  collapsedProjects.add(projectKey(item));
+  taskListScreen.render();
+  elements.search.focus();
+  return true;
+}
 
 elements.list.addEventListener('click', (event) => {
   const toggle = event.target.closest('.project-toggle');
