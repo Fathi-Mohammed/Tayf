@@ -15,6 +15,8 @@ const MARK_ELEMENTS = { code: 'code', strike: 's', underline: 'u', italic: 'em',
 const BLOCK_SELECTOR = 'p, h1, h2, h3, li, blockquote, pre';
 const MAX_HEADING = 3;
 const TASK_DONE = 'true';
+const ZERO_WIDTH = '\u200b';
+const BLANK_MARKS = /[\u200b☐☑]/g;
 
 const INPUT_RULES = [
   { pattern: /^[-*]$/, run: (block) => intoList(block, 'bullet') },
@@ -25,18 +27,45 @@ const INPUT_RULES = [
   { pattern: /^```$/, run: (block) => intoBlock(block, 'pre') }
 ];
 
+const ICONS = {
+  code: '<path d="M6 4.2 2.6 8 6 11.8M10 4.2 13.4 8 10 11.8" />',
+  bullet:
+    '<path d="M6 4h7.6M6 8h7.6M6 12h7.6" />' +
+    '<circle cx="3" cy="4" r=".9" fill="currentColor" stroke="none" />' +
+    '<circle cx="3" cy="8" r=".9" fill="currentColor" stroke="none" />' +
+    '<circle cx="3" cy="12" r=".9" fill="currentColor" stroke="none" />',
+  ordered:
+    '<path d="M6 4h7.6M6 8h7.6M6 12h7.6" />' +
+    '<path d="M2.2 3.2 3 2.8v2.6M2 11h1.8L2 13h1.9" />',
+  task:
+    '<path d="M6.6 4h7M6.6 8h7M6.6 12h7" />' +
+    '<path d="M1.6 3.9 2.6 5l1.9-2M1.6 7.9 2.6 9l1.9-2M1.6 11.9 2.6 13l1.9-2" />',
+  quote:
+    '<path d="M6.4 5.2c-1.7 0-2.9 1.1-2.9 2.6 0 1.3.9 2.2 2.1 2.2 1 0 1.8-.6 1.8-1.5' +
+    'M13.4 5.2c-1.7 0-2.9 1.1-2.9 2.6 0 1.3.9 2.2 2.1 2.2 1 0 1.8-.6 1.8-1.5" />',
+  image:
+    '<rect x="2.2" y="3.2" width="11.6" height="9.6" rx="1.6" />' +
+    '<path d="M2.6 10.6 5.8 7.9l2.7 2.3 2-1.6 2.9 2.4" />' +
+    '<circle cx="10.4" cy="6.2" r="1" />',
+  mention:
+    '<circle cx="8" cy="8" r="2.6" />' +
+    '<path d="M10.6 6.6v2.7c0 1 .7 1.6 1.6 1.6 1.1 0 1.8-.9 1.8-2.3A6 6 0 1 0 11.4 13" />'
+};
+
 const TOOLS = [
   { id: 'bold', label: 'B', title: 'عريض · Ctrl+B' },
   { id: 'italic', label: 'I', title: 'مايل · Ctrl+I' },
   { id: 'underline', label: 'U', title: 'تحته خط · Ctrl+U' },
   { id: 'strike', label: 'S', title: 'مشطوب · Ctrl+Shift+S' },
-  { id: 'code', label: '</>', title: 'كود · Ctrl+Shift+M' },
-  { id: 'bullet', label: '•', title: 'نقط · Ctrl+Shift+8' },
-  { id: 'ordered', label: '1.', title: 'ترقيم · Ctrl+Shift+7' },
-  { id: 'task', label: '☑', title: 'تشيك ليست · Ctrl+Shift+6' },
-  { id: 'quote', label: '❝', title: 'اقتباس' },
-  { id: 'image', label: '🖼', title: 'صورة — أو الزقها على طول' },
-  { id: 'mention', label: '@', title: 'منشن' }
+  { id: 'code', icon: ICONS.code, title: 'كود · Ctrl+Shift+M' },
+  { gap: true },
+  { id: 'bullet', icon: ICONS.bullet, title: 'نقط · Ctrl+Shift+8' },
+  { id: 'ordered', icon: ICONS.ordered, title: 'ترقيم · Ctrl+Shift+7' },
+  { id: 'task', icon: ICONS.task, title: 'تشيك ليست · Ctrl+Shift+6' },
+  { id: 'quote', icon: ICONS.quote, title: 'اقتباس · > في أول السطر' },
+  { gap: true },
+  { id: 'image', icon: ICONS.image, title: 'صورة — أو الزقها على طول' },
+  { id: 'mention', icon: ICONS.mention, title: 'منشن — أو اكتب @' }
 ];
 
 const SHORTCUTS = {
@@ -78,7 +107,7 @@ function command(name, value) {
 }
 
 function spanOf(rawText, marks) {
-  const span = { text: rawText.replace(/\u00a0/g, ' ') };
+  const span = { text: rawText.replace(/\u00a0/g, ' ').replace(/\u200b/g, '') };
   MARK_ORDER.forEach((name) => {
     if (marks[name]) span[name] = true;
   });
@@ -278,7 +307,7 @@ export function writeDoc(element, doc) {
 }
 
 export function isEmpty(element) {
-  return !element.textContent.replace(/[☐☑]/g, '').trim() && !element.querySelector('.men');
+  return !element.textContent.replace(BLANK_MARKS, '').trim() && !element.querySelector('.men');
 }
 
 export function markEmpty(element) {
@@ -402,11 +431,29 @@ function applyInputRule(element) {
   return false;
 }
 
+function caretAfter(node) {
+  const caret = document.createRange();
+  caret.setStartAfter(node);
+  caret.collapse(true);
+
+  const selection = document.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(caret);
+}
+
 function toggleCode() {
   const selection = document.getSelection();
-  if (!selection || selection.isCollapsed) return;
+  if (!selection || !selection.rangeCount || !selection.anchorNode) return;
 
-  const inside = selection.anchorNode.parentElement.closest('code');
+  const holder = selection.anchorNode.parentElement;
+  const inside = holder && holder.closest('code');
+
+  if (inside && selection.isCollapsed) {
+    const after = document.createTextNode(ZERO_WIDTH);
+    inside.after(after);
+    caretAfter(after);
+    return;
+  }
   if (inside) {
     inside.replaceWith(document.createTextNode(inside.textContent));
     return;
@@ -414,8 +461,17 @@ function toggleCode() {
 
   const range = selection.getRangeAt(0);
   const code = document.createElement('code');
+
+  if (selection.isCollapsed) {
+    code.textContent = ZERO_WIDTH;
+    range.insertNode(code);
+    caretInto(code);
+    return;
+  }
+
   code.appendChild(range.extractContents());
   range.insertNode(code);
+  caretInto(code);
 }
 
 function listTool(element, variant) {
@@ -515,18 +571,15 @@ function asDataUrl(file) {
   });
 }
 
-async function takeImage(element, file) {
+async function storeImage(element, file, preview) {
   const { upload, onProblem } = toolsFor(element);
   if (!upload) {
     if (onProblem) onProblem();
     return;
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const name = file.name || `لزقة-${Date.now()}.png`;
-  const shown = insertImage(element, await asDataUrl(file), '', name);
-
-  const stored = await upload({ name, mime: file.type || 'image/png', bytes });
+  const shown = insertImage(element, preview, '', file.name);
+  const stored = await upload(file);
   if (!stored) {
     shown.remove();
     markEmpty(element);
@@ -534,7 +587,16 @@ async function takeImage(element, file) {
   }
 
   shown.dataset.url = stored.url;
-  imageData.set(stored.url, shown.src);
+  if (preview) imageData.set(stored.url, preview);
+  else paintImage(shown, stored.url);
+}
+
+async function takeImage(element, file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const name = file.name || `لزقة-${Date.now()}.png`;
+  const preview = await asDataUrl(file);
+
+  return storeImage(element, { name, mime: file.type || 'image/png', bytes }, preview);
 }
 
 function pastedImage(event) {
@@ -555,29 +617,51 @@ function onPaste(event) {
   if (text) command('insertText', text);
 }
 
-function pickImage(element) {
-  const picker = document.createElement('input');
-  picker.type = 'file';
-  picker.accept = 'image/*';
-  picker.addEventListener('change', () => {
-    const file = picker.files && picker.files[0];
-    if (file) takeImage(element, file);
-  });
-  picker.click();
+async function pickImage(element) {
+  const { upload, onProblem } = toolsFor(element);
+  if (!upload) {
+    if (onProblem) onProblem();
+    return;
+  }
+
+  const chosen = await window.tayf.pickImage();
+  if (!chosen || !chosen.file) return;
+
+  element.focus();
+  await storeImage(element, chosen.file, '');
+}
+
+function toolElement(tool) {
+  if (tool.gap) {
+    const gap = document.createElement('span');
+    gap.className = 'egap';
+    return gap;
+  }
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.tool = tool.id;
+  button.title = tool.title;
+
+  if (tool.icon) {
+    button.innerHTML =
+      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" ' +
+      `stroke-linecap="round" stroke-linejoin="round">${tool.icon}</svg>`;
+    return button;
+  }
+
+  const glyph = document.createElement('span');
+  glyph.className = `glyph ${tool.id}`;
+  glyph.textContent = tool.label;
+  button.appendChild(glyph);
+  return button;
 }
 
 function buildToolbar(element) {
   const bar = document.createElement('div');
   bar.className = 'etools';
 
-  TOOLS.forEach((tool) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.dataset.tool = tool.id;
-    button.title = tool.title;
-    button.textContent = tool.label;
-    bar.appendChild(button);
-  });
+  TOOLS.forEach((tool) => bar.appendChild(toolElement(tool)));
 
   bar.addEventListener('mousedown', (event) => {
     const button = event.target.closest('button');

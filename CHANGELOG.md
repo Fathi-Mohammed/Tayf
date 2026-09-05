@@ -63,6 +63,20 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ### Fixed
 
+- The overlay used to vanish the moment the file dialog opened, and never came back —
+  it hides on losing focus, and a native dialog takes focus. It now holds itself open
+  while a dialog of its own is up, and the picker is Electron's rather than a hidden
+  file input.
+
+- Inline code did nothing unless text was selected first. Pressing it with the caret
+  sitting in a line now opens a code run and typing continues inside it, and pressing
+  it again steps back out — the way bold has always worked.
+
+- The toolbar reads as one: drawn icons for code, the three lists, quote, image and
+  mention, with the four letters styled as what they do, and separators between the
+  groups. The row of typing hints under the box is gone; the icons carry the same
+  shortcuts in their tooltips.
+
 - Leaving the create form and coming back to it lost the custom date and option rows.
   They are cleared on the way out but were only redrawn when the board or the type
   changed, so a second visit had none of them. They are redrawn on the way in now.

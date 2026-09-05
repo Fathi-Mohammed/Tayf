@@ -23,6 +23,7 @@ class OverlayWindow {
     this.window = null;
     this.ready = false;
     this.pendingShow = null;
+    this.held = 0;
   }
 
   isAlive(window = this.window) {
@@ -56,7 +57,7 @@ class OverlayWindow {
     window.setAlwaysOnTop(true, 'screen-saver');
     window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     window.on('blur', () => {
-      if (this.window === window) this.hide();
+      if (this.window === window && !this.held) this.hide();
     });
     window.on('closed', () => {
       if (this.window !== window) return;
@@ -117,6 +118,18 @@ class OverlayWindow {
     const payload = { openedAt, state, screen: requestedScreen };
     if (this.ready) this.send('overlay:shown', payload);
     else this.pendingShow = payload;
+  }
+
+  hold() {
+    this.held += 1;
+  }
+
+  release() {
+    this.held = Math.max(0, this.held - 1);
+    if (!this.held && this.isVisible()) {
+      this.window.show();
+      this.window.focus();
+    }
   }
 
   hide() {

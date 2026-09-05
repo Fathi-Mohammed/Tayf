@@ -956,21 +956,27 @@
     color: var(--text); font-family: var(--sans); font-size: var(--fs-body);
     line-height: var(--lh-normal); outline: none;
   }
-  #vcin { min-height: 60px; }
+  #vcin { min-height: 72px; }
   #view .ewrap { margin-top: var(--sp-5); }
 
   .etools {
-    display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-bottom: var(--sp-2);
+    display: flex; align-items: center; gap: 1px; margin-bottom: var(--sp-2);
     direction: ltr; justify-content: flex-end;
   }
   .etools button {
-    min-width: 26px; height: 24px; padding: 0 var(--sp-2);
-    background: none; border: 1px solid transparent; border-radius: var(--r-2);
-    color: var(--dim); font-family: var(--mono); font-size: var(--fs-subheadline);
-    cursor: pointer;
+    display: grid; place-items: center; width: 26px; height: 26px; padding: 0;
+    background: none; border: none; border-radius: var(--r-2);
+    color: var(--muted); cursor: pointer;
   }
   .etools button:hover { background: var(--hover); color: var(--text); }
   .etools button:active { background: var(--accent-bg); color: var(--accent); }
+  .etools svg { width: 15px; height: 15px; }
+  .etools .glyph { font-size: var(--fs-callout); line-height: 1; }
+  .etools .glyph.bold { font-weight: 800; }
+  .etools .glyph.italic { font-style: italic; font-family: Georgia, 'Times New Roman', serif; }
+  .etools .glyph.underline { text-decoration: underline; text-underline-offset: 2px; }
+  .etools .glyph.strike { text-decoration: line-through; }
+  .egap { width: 1px; height: 14px; margin: 0 var(--sp-2); background: var(--line); }
   .editor:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
   .editor[contenteditable='false'] {
     color: var(--muted); background-color: var(--fill-3); border-color: var(--line);
@@ -1017,6 +1023,7 @@
   }
 
   #vpeople { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+  #vpeople:empty { display: none; }
   #vpeople button {
     padding: var(--sp-1) var(--sp-3); border-radius: var(--r-2);
     background: var(--fill-3); border: 1px solid var(--fill-2); color: var(--muted);
@@ -1024,11 +1031,6 @@
   }
   #vpeople button:hover { background: var(--accent-bg); border-color: var(--accent-line); color: var(--accent); }
 
-  #vchints {
-    display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-3);
-    font-family: var(--mono); font-size: var(--fs-footnote); color: var(--dim);
-  }
-  #vchints kbd { margin-inline-end: var(--sp-2); }
 
   #mentions {
     display: none; position: fixed; z-index: 25;
