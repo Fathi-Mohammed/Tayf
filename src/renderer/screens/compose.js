@@ -22,6 +22,9 @@ const PRESETS = {
   }
 };
 
+const RICH_DESCRIPTION =
+  'الوصف فيه تنسيق من جيرا (نقط · عريض · صور) — قفلناه هنا عشان الحفظ مايمسحوش. عدّله في جيرا بـ Ctrl+O';
+
 const context = {
   intent: 'create',
   boards: [],
@@ -347,6 +350,7 @@ async function enterCreate(prefillTitle, preset) {
   setRow(elements.cboardwrap, elements.lblboard, true);
   setRow(elements.ctype, elements.lbltype, true);
   elements.cdescin.value = '';
+  elements.cdescin.readOnly = false;
   elements.cdue.value = preset ? preset.due : '';
   elements.cest.value = preset ? preset.estimate : '';
   elements.search.placeholder = preset ? preset.placeholder : 'عنوان التاسك الجديدة';
@@ -424,8 +428,9 @@ async function enterEdit(item) {
   elements.cdue.value = detail.due || '';
   elements.cest.value = detail.estimate || '';
   elements.cdescin.value = detail.description || '';
+  elements.cdescin.readOnly = !!detail.descriptionIsRich;
 
-  setNote('', '');
+  setNote(detail.descriptionIsRich ? RICH_DESCRIPTION : '', '');
   elements.search.focus();
   elements.search.select();
 }

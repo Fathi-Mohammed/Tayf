@@ -70,8 +70,8 @@ async function updateItem(client, key, fields) {
   await client.put(`/rest/api/3/issue/${encodeURIComponent(key)}`, { fields: payload });
 }
 
-async function addComment(client, key, text) {
-  const body = textToDocument(text);
+async function addComment(client, key, text, mentions) {
+  const body = textToDocument(text, mentions);
   const created = await client.post(`/rest/api/3/issue/${encodeURIComponent(key)}/comment`, {
     body
   });

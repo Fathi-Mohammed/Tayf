@@ -2,6 +2,7 @@ import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
 import { escapeHtml, relativeTime } from '../format.js';
+import { resetMentions, pickedMentions } from '../mention-picker.js';
 
 const context = { detail: null, requestId: 0, sending: false };
 
@@ -46,7 +47,11 @@ export async function sendComment() {
 
   context.sending = true;
   setFlash('بيبعت الكومنت…', 'pending');
-  const response = await window.tayf.comment({ key: detail.key, text });
+  const response = await window.tayf.comment({
+    key: detail.key,
+    text,
+    mentions: pickedMentions()
+  });
   context.sending = false;
   if (context.detail !== detail) return;
 
@@ -56,6 +61,7 @@ export async function sendComment() {
   }
 
   elements.vcin.value = '';
+  resetMentions(detail.projectKey);
   detail.comments = [...(detail.comments || []), response.comment];
   detail.commentTotal = (detail.commentTotal || 0) + 1;
   renderComments(detail);
@@ -111,6 +117,7 @@ export const itemViewScreen = {
 
     const detail = response.item;
     context.detail = detail;
+    resetMentions(detail.projectKey);
     elements.vtitle.textContent = detail.title;
     elements.vmeta.innerHTML = metaEntries(item, detail)
       .map(
@@ -133,6 +140,7 @@ export const itemViewScreen = {
   leave() {
     context.requestId += 1;
     context.detail = null;
+    resetMentions(null);
     elements.vcin.value = '';
     renderComments(null);
   },

@@ -17,7 +17,7 @@ const IDS = [
   'finish', 'ftask', 'lblfres', 'fres', 'lblftime', 'ftime', 'fest', 'fnote',
   'foot', 'meta', 'foots', 'metas', 'footv', 'metav',
   'footd', 'metad', 'footc', 'metac', 'footf', 'metaf',
-  'actions'
+  'actions', 'mentions'
 ];
 
 const elements = Object.fromEntries(IDS.map((id) => [id, document.getElementById(id)]));

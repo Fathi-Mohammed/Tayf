@@ -38,8 +38,8 @@ class JiraProvider {
     return issues.updateItem(this.client, key, fields);
   }
 
-  addComment(key, text) {
-    return issues.addComment(this.client, key, text);
+  addComment(key, text, mentions) {
+    return issues.addComment(this.client, key, text, mentions);
   }
 
   transitions(key) {

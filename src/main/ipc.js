@@ -83,10 +83,10 @@ function register({ workspace, overlay, settings, actions }) {
     }
   });
 
-  ipcMain.handle('item:comment', async (_event, { key, text }) => {
+  ipcMain.handle('item:comment', async (_event, { key, text, mentions }) => {
     if (!provider()) return notConfigured();
     try {
-      return { comment: await workspace.commentOnItem(key, text) };
+      return { comment: await workspace.commentOnItem(key, text, mentions) };
     } catch (error) {
       const message = NOTIFICATION_TEXT.commentFailed(errorText(error));
       workspace.recordFailure(key, message);

@@ -23,6 +23,12 @@ import {
   sendComment
 } from './screens/item-view.js';
 import {
+  isOpen as mentionIsOpen,
+  movePicker as moveMention,
+  choosePicker as chooseMention,
+  closePicker as closeMentions
+} from './mention-picker.js';
+import {
   save as saveSettings,
   showTabByNumber,
   onConnectionTab
@@ -78,7 +84,20 @@ function handleSettings(event, key) {
   return true;
 }
 
+function handleMention(event) {
+  if (event.key === 'ArrowDown') moveMention(1);
+  else if (event.key === 'ArrowUp') moveMention(-1);
+  else if (event.key === 'Enter' || event.key === 'Tab') chooseMention();
+  else if (event.key === 'Escape') closeMentions();
+  else return true;
+
+  event.preventDefault();
+  return true;
+}
+
 function handleComment(event) {
+  if (mentionIsOpen()) return handleMention(event);
+
   if (event.key === 'Escape') {
     event.preventDefault();
     elements.vcin.blur();

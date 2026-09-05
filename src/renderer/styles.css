@@ -959,6 +959,18 @@
   #vcin:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
   #vcin::placeholder { color: var(--dim); }
 
+  #mentions {
+    display: none; position: fixed; z-index: 25;
+    max-height: 190px; overflow-y: auto; padding: var(--sp-2);
+    background: var(--elev); border: 1px solid var(--line); border-radius: var(--r-4);
+    box-shadow: var(--shadow-2);
+  }
+  .mrow {
+    padding: var(--sp-3) var(--sp-4); border-radius: var(--r-2);
+    font-size: var(--fs-callout); color: var(--muted); cursor: pointer;
+  }
+  .mrow.on { background: var(--accent-bg); color: var(--accent); }
+
   .cgrid textarea {
     width: 100%; padding: var(--sp-4); resize: none;
     background-color: var(--fill);
@@ -967,6 +979,9 @@
     line-height: var(--lh-normal); outline: none;
   }
   .cgrid textarea:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
+  .cgrid textarea[readonly] {
+    color: var(--muted); background-color: var(--fill-3); border-color: var(--line);
+  }
   .cgrid textarea::placeholder { color: var(--dim); }
   .cgrid label.top { align-self: start; padding-top: var(--sp-4); }
 

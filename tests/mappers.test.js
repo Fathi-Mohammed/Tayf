@@ -8,6 +8,7 @@ const {
   toWorkItemDetail,
   toTransition,
   documentToText,
+  isRichDocument,
   textToDocument
 } = require('../src/providers/jira/mappers');
 
@@ -203,5 +204,99 @@ test('documentToText keeps headings and list items readable', () => {
       paragraph('after')
     ]
   };
-  assert.equal(documentToText(document).trim(), 'Steps\n\none\ntwo\n\nafter');
+  assert.equal(documentToText(document).trim(), 'Steps\n\n• one\n• two\n\nafter');
+});
+
+test('documentToText spells out a mention instead of dropping it', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'thanks ' },
+          { type: 'mention', attrs: { id: 'acc-9', text: '@Sara Ali' } }
+        ]
+      }
+    ]
+  };
+  assert.equal(documentToText(document).trim(), 'thanks \u2068@Sara Ali\u2069');
+});
+
+test('documentToText keeps the link behind the words, and marks an image', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text: 'the spec',
+            marks: [{ type: 'link', attrs: { href: 'https://x.test/s' } }]
+          }
+        ]
+      },
+      { type: 'mediaSingle', content: [{ type: 'media', attrs: { id: 'm1', type: 'file' } }] }
+    ]
+  };
+  assert.equal(documentToText(document).trim(), 'the spec (https://x.test/s)\n\n[image]');
+});
+
+test('documentToText shows which task list items are ticked', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'taskList',
+        content: [
+          {
+            type: 'taskItem',
+            attrs: { state: 'DONE' },
+            content: [{ type: 'text', text: 'shipped' }]
+          },
+          {
+            type: 'taskItem',
+            attrs: { state: 'TODO' },
+            content: [{ type: 'text', text: 'pending' }]
+          }
+        ]
+      }
+    ]
+  };
+  assert.equal(documentToText(document).trim(), '[x] shipped\n[ ] pending');
+});
+
+test('isRichDocument tells a plain document from one we cannot rebuild', () => {
+  assert.equal(isRichDocument(textToDocument('one\ntwo\n\nthree')), false);
+  assert.equal(isRichDocument(null), false);
+  assert.equal(
+    isRichDocument({
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'bold', marks: [{ type: 'strong' }] }] }
+      ]
+    }),
+    true
+  );
+  assert.equal(isRichDocument({ type: 'doc', content: [{ type: 'bulletList', content: [] }] }), true);
+});
+
+test('textToDocument turns picked names into real mentions, longest first', () => {
+  const document = textToDocument('thanks @Sara Ali and @Sara', [
+    { text: '@Sara', accountId: 'acc-3' },
+    { text: '@Sara Ali', accountId: 'acc-9' }
+  ]);
+
+  assert.deepEqual(document.content[0].content, [
+    { type: 'text', text: 'thanks ' },
+    { type: 'mention', attrs: { id: 'acc-9', text: '@Sara Ali' } },
+    { type: 'text', text: ' and ' },
+    { type: 'mention', attrs: { id: 'acc-3', text: '@Sara' } }
+  ]);
+});
+
+test('textToDocument ignores a mention that is missing an account', () => {
+  const document = textToDocument('hi @Ghost', [{ text: '@Ghost' }]);
+  assert.deepEqual(document.content[0].content, [{ type: 'text', text: 'hi @Ghost' }]);
 });
