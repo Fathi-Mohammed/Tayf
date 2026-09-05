@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, setContext, paintBanners, setFlash, setVisible, setFooterMeta } from '../chrome.js';
@@ -53,15 +54,15 @@ function showRequirements() {
 
   const applied = (requirements.applied || []).map((one) => `${one.label} = ${one.value}`);
   if (applied.length) {
-    setNote(`هيتحط تلقائي عشان تظهر على البورد:  ${applied.join('  ·  ')}`, 'good');
+    setNote(t("هيتحط تلقائي عشان تظهر على البورد:  {0}", [applied.join('  ·  ')]), 'good');
   } else {
-    setNote('ده البورد الافتراضي للمشروع — مفيش حاجة زيادة', '');
+    setNote(t("ده البورد الافتراضي للمشروع — مفيش حاجة زيادة"), '');
   }
   setFooterMeta('metac', projectKey || '');
 }
 
 async function loadBoards() {
-  setNote('بيجيب البوردات…', '');
+  setNote(t("بيجيب البوردات…"), '');
   const response = await window.tayf.boards();
   if (response.error) {
     setNote(response.error, 'bad');
@@ -85,14 +86,14 @@ async function onBoardChange() {
   const board = context.boards.find((candidate) => candidate.id === boardId);
   if (!board) return;
 
-  setNote('بيقرا إعدادات البورد…', '');
+  setNote(t("بيقرا إعدادات البورد…"), '');
   const requirements = await window.tayf.boardRequirements(boardId);
   if (requestId !== context.requestId) return;
 
   context.requirements = requirements;
   context.projectKey = (requirements && requirements.projectKey) || board.projectKey;
   if (!context.projectKey) {
-    setNote('مقدرناش نعرف مشروع البورد ده', 'bad');
+    setNote(t("مقدرناش نعرف مشروع البورد ده"), 'bad');
     return;
   }
 
@@ -113,7 +114,7 @@ async function loadIssueTypes(requestId) {
 
   const types = response.types || [];
   if (!types.length) {
-    setNote(`مفيش أنواع تاسكات في ${context.projectKey}`, 'bad');
+    setNote(t("مفيش أنواع تاسكات في {0}", [context.projectKey]), 'bad');
     return;
   }
 
@@ -138,7 +139,7 @@ async function loadAssignees(requestId) {
     return;
   }
 
-  const options = [{ id: '', label: '— مش مسندة —' }].concat(
+  const options = [{ id: '', label: t("— مش مسندة —") }].concat(
     (response.users || []).map((user) => ({ id: user.accountId, label: user.name }))
   );
   assigneeCombo.setOptions(options, response.currentUserId || '');
@@ -173,12 +174,12 @@ async function submitCreate() {
 
   const summary = elements.search.value.trim();
   if (!summary) {
-    setNote('اكتب عنوان التاسك الأول', 'bad');
+    setNote(t("اكتب عنوان التاسك الأول"), 'bad');
     elements.search.focus();
     return;
   }
   if (!boardCombo.value || !elements.ctype.value) {
-    setNote('مستني البوردات تحمّل', 'bad');
+    setNote(t("مستني البوردات تحمّل"), 'bad');
     return;
   }
 
@@ -204,7 +205,7 @@ async function submitCreate() {
   }
 
   context.submitting = true;
-  setNote('بيعمل التاسك…', '');
+  setNote(t("بيعمل التاسك…"), '');
 
   const response = await window.tayf.createItem({
     boardId: parseInt(boardCombo.value, 10),
@@ -226,7 +227,7 @@ async function submitCreate() {
   }
 
   await backToTaskList();
-  setFlash(`اتعملت · <b>${escapeHtml(response.key)}</b>`, 'done');
+  setFlash(t("اتعملت · <b>{0}</b>", [escapeHtml(response.key)]), 'done');
 }
 
 async function submitEdit() {
@@ -235,7 +236,7 @@ async function submitEdit() {
 
   const title = elements.search.value.trim();
   if (!title) {
-    setNote('العنوان مايبقاش فاضي', 'bad');
+    setNote(t("العنوان مايبقاش فاضي"), 'bad');
     elements.search.focus();
     return;
   }
@@ -291,12 +292,12 @@ async function submitEdit() {
   });
 
   if (!Object.keys(fields).length) {
-    setNote('مفيش حاجة اتغيّرت', '');
+    setNote(t("مفيش حاجة اتغيّرت"), '');
     return;
   }
 
   context.submitting = true;
-  setNote('بيحفظ…', '');
+  setNote(t("بيحفظ…"), '');
   const response = await window.tayf.updateItem({ key: detail.key, fields });
   context.submitting = false;
 
@@ -307,7 +308,7 @@ async function submitEdit() {
 
   const key = detail.key;
   await backToTaskList(key);
-  setFlash(`اتحفظت · <b>${escapeHtml(key)}</b>`, 'done');
+  setFlash(t("اتحفظت · <b>{0}</b>", [escapeHtml(key)]), 'done');
 }
 
 export function submit() {
@@ -338,7 +339,7 @@ async function enterCreate(prefillTitle) {
   setRow(elements.cboardwrap, elements.lblboard, true);
   setRow(elements.ctype, elements.lbltype, true);
   elements.cdescin.value = '';
-  elements.search.placeholder = 'عنوان التاسك الجديدة';
+  elements.search.placeholder = t("عنوان التاسك الجديدة");
   if (prefillTitle !== undefined) elements.search.value = prefillTitle;
 
   composeScreen.render();
@@ -356,7 +357,7 @@ async function enterEdit(item) {
   context.requirements = null;
   ensureRows();
 
-  elements.search.placeholder = 'عنوان التاسك';
+  elements.search.placeholder = t("عنوان التاسك");
   elements.search.value = item.title || '';
   setContext(
     `<b>${escapeHtml(item.key)}</b> &nbsp; ${escapeHtml(item.type || '')}` +
@@ -364,7 +365,7 @@ async function enterEdit(item) {
   );
   setVisible(elements.cdesc, false);
   composeScreen.render();
-  setNote('بيجيب التفاصيل…', '');
+  setNote(t("بيجيب التفاصيل…"), '');
 
   const requestId = ++context.requestId;
   const response = await window.tayf.item(item.key);
@@ -447,7 +448,7 @@ elements.cdue.addEventListener('input', () => {
     return;
   }
   const parsed = parseDueDate(elements.cdue.value);
-  setNote(parsed.ok ? `التسليم: ${parsed.label}` : parsed.label, parsed.ok ? 'good' : 'bad');
+  setNote(parsed.ok ? t("التسليم: {0}", [parsed.label]) : parsed.label, parsed.ok ? 'good' : 'bad');
 });
 
 elements.cest.addEventListener('input', () => {
@@ -456,14 +457,16 @@ elements.cest.addEventListener('input', () => {
     return;
   }
   const parsed = parseEstimate(elements.cest.value);
-  setNote(parsed.ok ? `الوقت المتوقع: ${parsed.value}` : parsed.label, parsed.ok ? 'good' : 'bad');
+  setNote(parsed.ok ? t("الوقت المتوقع: {0}", [parsed.value]) : parsed.label, parsed.ok ? 'good' : 'bad');
 });
 
 elements.cdue.addEventListener('keydown', (event) => {
   if (event.key !== 'Tab' || event.shiftKey) return;
-  const typed = elements.cdue.value.trim();
+  const typed = elements.cdue.value.trim().toLowerCase();
   if (!typed) return;
-  const completion = DATE_WORDS.find((word) => word !== typed && word.startsWith(typed));
+  const completion = DATE_WORDS.find((word) =>
+    word.toLowerCase() !== typed && word.toLowerCase().startsWith(typed)
+  );
   if (!completion) return;
   event.preventDefault();
   setDueDate(completion);

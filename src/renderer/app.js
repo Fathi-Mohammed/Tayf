@@ -8,7 +8,7 @@ import { transitionsScreen } from './screens/transitions.js';
 import { transitionFormScreen } from './screens/transition-form.js';
 import { composeScreen } from './screens/compose.js';
 import { itemViewScreen } from './screens/item-view.js';
-import { settingsScreen } from './screens/settings.js';
+import { settingsScreen, showTab } from './screens/settings.js';
 import { applyPreferences } from './appearance.js';
 
 const OPEN_SCREEN = {
@@ -39,31 +39,40 @@ function reportOpenTime(openedAt) {
   });
 }
 
-window.tayf.onState((next) => {
+export function handleState(next) {
   setWorkspace(next);
   repaint();
-});
+}
 
-window.tayf.onShown((payload) => {
+export function handleShown(payload) {
   if (payload.state) setWorkspace(payload.state);
   setFlash('', '');
 
   const requested = payload.state && !payload.state.configured ? 'settings' : payload.screen;
   (OPEN_SCREEN[requested] || OPEN_SCREEN.list)();
   reportOpenTime(payload.openedAt);
-});
+}
 
-relabelForMac();
-installKeyboard();
+export async function startApp(preferences) {
+  relabelForMac();
+  document.getElementById('actionkey').textContent =
+    document.documentElement.dir === 'ltr' ? '→' : '←';
+  installKeyboard();
 
-installBoard(repaint);
+  installBoard(repaint);
 
-window.tayf.readPreferences().then((preferences) => {
   applyPreferences(preferences);
   adoptPreferences(preferences);
-});
 
-window.tayf.state().then((next) => {
+  const next = await window.tayf.state();
   setWorkspace(next);
+  const languageTab = window.sessionStorage.getItem('language-settings');
+  if (languageTab) {
+    window.sessionStorage.removeItem('language-settings');
+    await goTo('settings');
+    showTab(languageTab);
+    document.getElementById('slanguage-trigger').focus();
+    return;
+  }
   return goTo('tasks');
-});
+}

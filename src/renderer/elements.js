@@ -5,7 +5,7 @@ const IDS = [
   'today', 'ringwrap', 'tsub', 'active', 'hints',
   'settings', 'snav', 'pconn', 'pnudge', 'pgen', 'pappear', 'tokenlink',
   'ssite', 'semail', 'stoken', 'snote',
-  'shotkey', 'saddkey', 'sauto', 'sautotext',
+  'shotkey', 'saddkey', 'sauto', 'sautotext', 'slanguage',
   'sappearance', 'stheme', 'sfont', 'sscale',
   'snudge', 'snudgeevery', 'snudgeidle', 'snudgestart', 'snudgeend', 'snudgedays',
   'snudgecheck', 'snudgecheckevery', 'snudgeoverdue', 'snudgeoverduedays', 'snudgestatuses',

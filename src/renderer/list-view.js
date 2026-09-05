@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import elements from './elements.js';
 import { state, clampSelection, isInHand } from './state.js';
 import { setVisible } from './chrome.js';
@@ -90,7 +91,7 @@ export function itemRowHtml(item, selected, index) {
 
 export function transitionRowHtml(transition, index, selected, needsDetails) {
   const category = transition.toCategory || 'new';
-  const hint = needsDetails ? ' <span class="dim">· هيسأل عن تفاصيل</span>' : '';
+  const hint = needsDetails ? t(" <span class=\"dim\">· هيسأل عن تفاصيل</span>") : '';
 
   return (
     `<div class="row c-${category}${selected ? ' on' : ''}" data-i="${index}">` +

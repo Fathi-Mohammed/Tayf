@@ -19,6 +19,7 @@ const DEFAULTS = {
   nudgeCheckMinutes: 90,
   nudgeSnoozeUntil: null,
   appearance: 'system',
+  language: 'ar',
   theme: 'tokyo',
   font: 'default',
   uiScale: 1,

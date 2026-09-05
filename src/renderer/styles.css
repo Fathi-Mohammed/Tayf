@@ -769,6 +769,7 @@
     cursor: pointer;
   }
   .cgrid select:hover { background-color: var(--fill-2); }
+  html[dir="ltr"] .cgrid select { background-position: right var(--sp-5) center; }
 
   /* ── قايمة الاختيار ────────────────────────────────────────────────────
      الزرار جوه الصف، واللوحة معلّقة على <body> عشان متتقصّش من السكرول. */

@@ -1,3 +1,4 @@
+import { t, getLocale } from './i18n.js';
 const TYPE_BADGES = [
   { match: (name) => name.startsWith('sub') || name.includes('sub-task'), badge: 'SUB', className: 'ty-sub' },
   { match: (name) => name.includes('bug'), badge: 'BUG', className: 'ty-bug' },
@@ -11,7 +12,7 @@ const DEFAULT_BADGE = { badge: 'TASK', className: '' };
 const FILLED_SEGMENTS = { new: 1, indeterminate: 2, done: 3 };
 const TOTAL_SEGMENTS = 3;
 
-export const UNTITLED = '(بدون عنوان)';
+export const UNTITLED = t("(بدون عنوان)");
 export const NO_STATUS = '—';
 
 export function escapeHtml(value) {
@@ -60,17 +61,17 @@ export function progressTrack(category) {
 export function relativeTime(timestamp) {
   if (!timestamp) return '';
   const seconds = Math.round((Date.now() - timestamp) / 1000);
-  if (seconds < 60) return 'الآن';
-  if (seconds < 3600) return `من ${Math.round(seconds / 60)}د`;
-  return `من ${Math.round(seconds / 3600)}س`;
+  if (seconds < 60) return t("الآن");
+  if (seconds < 3600) return t("من {0}د", [Math.round(seconds / 60)]);
+  return t("من {0}س", [Math.round(seconds / 3600)]);
 }
 
 const PRIORITY_LEVELS = [
-  { match: /highest|blocker|critical|أعلى|حرج|عاجل/, label: 'عاجلة', className: 'pr-top' },
-  { match: /lowest|أدنى|trivial/, label: 'أدنى', className: 'pr-low' },
-  { match: /high|عالي|مرتفع|major/, label: 'عالية', className: 'pr-high' },
-  { match: /medium|normal|متوسط|عادي/, label: 'متوسطة', className: 'pr-mid' },
-  { match: /low|منخفض|minor/, label: 'منخفضة', className: 'pr-low' }
+  { match: /highest|blocker|critical|أعلى|حرج|عاجل/, label: t("عاجلة"), className: 'pr-top' },
+  { match: /lowest|أدنى|trivial/, label: t("أدنى"), className: 'pr-low' },
+  { match: /high|عالي|مرتفع|major/, label: t("عالية"), className: 'pr-high' },
+  { match: /medium|normal|متوسط|عادي/, label: t("متوسطة"), className: 'pr-mid' },
+  { match: /low|منخفض|minor/, label: t("منخفضة"), className: 'pr-low' }
 ];
 
 const DURATION_UNITS = { w: 144000, d: 28800, h: 3600, m: 60 };
@@ -149,7 +150,7 @@ export function overtimeSeconds(item, now = Date.now()) {
 
 export function clockTime(timestamp) {
   try {
-    return new Date(timestamp).toLocaleTimeString('ar-EG-u-nu-latn', {
+    return new Date(timestamp).toLocaleTimeString(`${getLocale()}-u-nu-latn`, {
       hour: 'numeric',
       minute: '2-digit'
     });

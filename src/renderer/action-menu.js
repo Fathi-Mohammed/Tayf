@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import elements from './elements.js';
 import { state, selectedRow } from './state.js';
 import { goTo, activeScreenName } from './navigation.js';
@@ -10,11 +11,11 @@ const FALLBACK_WIDTH = 200;
 const FALLBACK_HEIGHT = 160;
 
 export const ACTIONS = [
-  { id: 'view', label: 'عرض', shortcut: 'V' },
-  { id: 'edit', label: 'تعديل', shortcut: 'E' },
-  { id: 'status', label: 'غيّر الحالة', shortcut: 'S' },
-  { id: 'jira', label: 'افتح في جيرا', shortcut: 'O' },
-  { id: 'copy', label: 'انسخ المفتاح', shortcut: 'C' }
+  { id: 'view', label: t("عرض"), shortcut: 'V' },
+  { id: 'edit', label: t("تعديل"), shortcut: 'E' },
+  { id: 'status', label: t("غيّر الحالة"), shortcut: 'S' },
+  { id: 'jira', label: t("افتح في جيرا"), shortcut: 'O' },
+  { id: 'copy', label: t("انسخ المفتاح"), shortcut: 'C' }
 ];
 
 let open = false;
@@ -49,10 +50,18 @@ function place() {
   const width = elements.actions.offsetWidth || FALLBACK_WIDTH;
   const height = elements.actions.offsetHeight || FALLBACK_HEIGHT;
 
-  let left = panel.left - width - EDGE_GAP;
-  if (left < EDGE_GAP) left = panel.right + EDGE_GAP;
+  const isLtr = document.documentElement.dir === 'ltr';
+  const rightSide = panel.right + EDGE_GAP;
+  const leftSide = panel.left - width - EDGE_GAP;
+  let left = isLtr ? rightSide : leftSide;
+  if (left < EDGE_GAP || left + width > window.innerWidth - EDGE_GAP) {
+    left = isLtr ? leftSide : rightSide;
+  }
 
-  elements.actions.style.left = `${Math.max(EDGE_GAP, left)}px`;
+  elements.actions.style.left = `${Math.max(
+    EDGE_GAP,
+    Math.min(left, window.innerWidth - width - EDGE_GAP)
+  )}px`;
   elements.actions.style.top = `${Math.max(
     EDGE_GAP,
     Math.min(anchor.top - ROW_OFFSET, window.innerHeight - height - EDGE_GAP)

@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import elements from './elements.js';
 import { state } from './state.js';
 import { escapeHtml, relativeTime } from './format.js';
@@ -92,9 +93,9 @@ export function paintBanners() {
     const key = failure.key ? `<b>${escapeHtml(failure.key)}</b> ` : '';
     toasts.push({
       kind: 'bad',
-      html: `${key}الأكشن ده ماتنفذش`,
+      html: t("{0}الأكشن ده ماتنفذش", [key]),
       sub: escapeHtml(failure.message),
-      hint: 'دوس هنا تقفل الرسالة · التاسك رجعت لحالتها الأصلية',
+      hint: t("دوس هنا تقفل الرسالة · التاسك رجعت لحالتها الأصلية"),
       dismiss: 'failure'
     });
   }
@@ -119,5 +120,5 @@ export function setFooterMeta(id, text) {
 }
 
 export function itemCountMeta() {
-  return `${state.rows.length} تاسك · ${relativeTime(state.workspace.fetchedAt)}`;
+  return t("{0} تاسك · {1}", [state.rows.length, relativeTime(state.workspace.fetchedAt)]);
 }

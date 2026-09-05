@@ -1,8 +1,9 @@
+import { t, getLocale } from './i18n.js';
 import elements from './elements.js';
 import { state } from './state.js';
 import { escapeHtml } from './format.js';
 
-const ALL_BOARDS = { id: null, name: 'كل البوردات' };
+const ALL_BOARDS = { id: null, name: t("كل البوردات") };
 
 let open = false;
 let highlighted = 0;
@@ -16,7 +17,7 @@ export function boardOptions() {
     });
   });
   const named = [...seen.values()].sort((first, second) =>
-    String(first.name).localeCompare(String(second.name), 'ar')
+    String(first.name).localeCompare(String(second.name), getLocale())
   );
   return [ALL_BOARDS, ...named];
 }

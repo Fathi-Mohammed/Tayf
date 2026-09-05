@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { state } from '../state.js';
 import { goTo } from '../navigation.js';
@@ -67,7 +68,7 @@ async function loadRequiredFields(item) {
     );
 
   if (meta.hasDueDate !== false && !detail.due) {
-    fields.push({ id: 'duedate', name: 'التسليم', kind: 'date' });
+    fields.push({ id: 'duedate', name: t("التسليم"), kind: 'date' });
   }
 
   dateFields
@@ -75,7 +76,7 @@ async function loadRequiredFields(item) {
     .forEach((field) => fields.push({ id: field.id, name: field.name, kind: 'date' }));
 
   if (meta.hasEstimate !== false && !detail.estimate) {
-    fields.push({ id: 'estimate', name: 'الوقت المتوقع', kind: 'estimate' });
+    fields.push({ id: 'estimate', name: t("الوقت المتوقع"), kind: 'estimate' });
   }
 
   return fields;
@@ -86,7 +87,7 @@ export async function chooseTransition(transition) {
   if (!transition || !item || state.busy) return;
 
   if (transition.toCategory === 'indeterminate' && requiredFieldsRequest && !requiredFields) {
-    setFlash(`بيشوف الناقص على <b>${escapeHtml(item.key)}</b>…`, 'pending');
+    setFlash(t("بيشوف الناقص على <b>{0}</b>…", [escapeHtml(item.key)]), 'pending');
     await requiredFieldsRequest;
     if (transitionContext.item !== item) return;
     setFlash('', '');
@@ -112,7 +113,7 @@ export async function runTransition(transition, extras) {
   transitionContext.pending = null;
 
   await backToTaskList(key);
-  setFlash(`<b>${escapeHtml(key)}</b> بينقل لـ ${escapeHtml(transition.toStatus)}…`, 'pending');
+  setFlash(t("<b>{0}</b> بينقل لـ {1}…", [escapeHtml(key), escapeHtml(transition.toStatus)]), 'pending');
 
   const result = await window.tayf.applyTransition({
     key,
@@ -129,7 +130,7 @@ export async function runTransition(transition, extras) {
     setFlash('', '');
     return;
   }
-  setFlash(`تمّت · <b>${escapeHtml(key)}</b> بقت ${escapeHtml(transition.toStatus)}`, 'done');
+  setFlash(t("تمّت · <b>{0}</b> بقت {1}", [escapeHtml(key), escapeHtml(transition.toStatus)]), 'done');
 }
 
 export const transitionsScreen = {
@@ -143,7 +144,7 @@ export const transitionsScreen = {
 
     setContext(`<b>${escapeHtml(item.key)}</b> &nbsp; ${escapeHtml(item.title || '')}`);
     elements.search.value = '';
-    elements.search.placeholder = 'اختار الحالة الجديدة';
+    elements.search.placeholder = t("اختار الحالة الجديدة");
     this.render();
 
     transitionContext.requiredFieldsRequest = loadRequiredFields(item)
@@ -182,7 +183,7 @@ export const transitionsScreen = {
     if (transitionContext.loading) {
       elements.list.style.display = 'none';
       elements.msg.style.display = 'block';
-      elements.msg.innerHTML = '<span class="dim">بيجيب الحالات المتاحة…</span>';
+      elements.msg.innerHTML = t("<span class=\"dim\">بيجيب الحالات المتاحة…</span>");
       state.rows = [];
       return;
     }
@@ -194,7 +195,7 @@ export const transitionsScreen = {
         )
       : transitionContext.transitions;
 
-    paintRows(rows, 'مفيش حالات متاحة للتاسك ده.', (transition, index, selected) =>
+    paintRows(rows, t("مفيش حالات متاحة للتاسك ده."), (transition, index, selected) =>
       transitionRowHtml(
         transition,
         index,

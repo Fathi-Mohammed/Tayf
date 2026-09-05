@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import elements from './elements.js';
 import { state, isInHand } from './state.js';
 import { setVisible } from './chrome.js';
@@ -24,12 +25,12 @@ function todayProgress() {
 }
 
 function remainingText(left, total) {
-  if (!total) return 'مفيش حاجة معادها النهاردة';
-  if (!left) return 'خلصت كل اللي عليك النهاردة';
-  if (left === 1) return 'فاضل تاسك واحدة قبل ما تقفل اليوم';
-  if (left === 2) return 'فاضل تاسكين قبل ما تقفل اليوم';
-  if (left <= 10) return `فاضل ${left} تاسكات قبل ما تقفل اليوم`;
-  return `فاضل ${left} تاسك قبل ما تقفل اليوم`;
+  if (!total) return t("مفيش حاجة معادها النهاردة");
+  if (!left) return t("خلصت كل اللي عليك النهاردة");
+  if (left === 1) return t("فاضل تاسك واحدة قبل ما تقفل اليوم");
+  if (left === 2) return t("فاضل تاسكين قبل ما تقفل اليوم");
+  if (left <= 10) return t("فاضل {0} تاسكات قبل ما تقفل اليوم", [left]);
+  return t("فاضل {0} تاسك قبل ما تقفل اليوم", [left]);
 }
 
 function ringHtml(done, total) {
@@ -63,7 +64,7 @@ function clockHtml(item) {
   const under =
     deadline === null
       ? ''
-      : `<span class="asub">${over ? 'كان المفروض تقفل' : 'المفروض تقفل'} ` +
+      : `<span class="asub">${over ? t("كان المفروض تقفل") : t("المفروض تقفل")} ` +
         `${escapeHtml(clockTime(deadline))}</span>`;
 
   return (
@@ -81,7 +82,7 @@ function activeHtml(item) {
   return (
     '<div class="ahead">' +
     '<span class="adot live"></span>' +
-    '<span class="astate">شغل جاري</span>' +
+    t("<span class=\"astate\">شغل جاري</span>") +
     `<span class="akey">${escapeHtml(item.key)}</span></div>` +
     `<div class="atitle">${escapeHtml(item.title || UNTITLED)}</div>` +
     `<div class="abar${over ? ' late' : ''}"><span style="width:${width}%"></span></div>` +

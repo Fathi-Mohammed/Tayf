@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { escapeHtml } from './format.js';
 
 const BLUR_DELAY_MS = 130;
@@ -41,7 +42,7 @@ export function createCombo(inputId, listId, onPick) {
               `data-id="${escapeHtml(option.id)}">${escapeHtml(option.label)}</div>`
           )
           .join('')
-      : '<div class="cempty">مفيش نتايج</div>';
+      : t("<div class=\"cempty\">مفيش نتايج</div>");
 
     const element = list.children[highlighted];
     if (element && element.scrollIntoView) element.scrollIntoView({ block: 'nearest' });

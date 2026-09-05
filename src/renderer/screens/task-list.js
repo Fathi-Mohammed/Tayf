@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { state, clampSelection, isInHand } from '../state.js';
 import { goTo } from '../navigation.js';
@@ -9,13 +10,13 @@ import { currentBoardName } from '../board-picker.js';
 import { toIsoDate } from '../dates.js';
 
 const SETUP_STEPS =
-  '<h3>وصّلها بـ Jira بتاعك</h3>' +
+  t("<h3>وصّلها بـ Jira بتاعك</h3>") +
   '<ol>' +
-  '<li>اعمل API Token من <code>id.atlassian.com/manage-profile/security/api-tokens</code></li>' +
-  '<li>افتح الإعدادات من أيقونة الساعة</li>' +
-  '<li>املا الموقع والإيميل والتوكن</li>' +
+  t("<li>اعمل API Token من <code>id.atlassian.com/manage-profile/security/api-tokens</code></li>") +
+  t("<li>افتح الإعدادات من أيقونة الساعة</li>") +
+  t("<li>املا الموقع والإيميل والتوكن</li>") +
   '</ol>' +
-  '<span class="note">الملف على جهازك بس. التوكن مبيتبعتش لأي حد.</span>';
+  t("<span class=\"note\">الملف على جهازك بس. التوكن مبيتبعتش لأي حد.</span>");
 
 export const FILTERS = ['all', 'today', 'late', 'wip'];
 
@@ -27,10 +28,10 @@ const MATCHES_FILTER = {
 };
 
 const SECTIONS = [
-  { id: 'today', label: 'النهاردة', tone: '', match: (item, today) => item.due === today },
-  { id: 'late', label: 'متأخرة', tone: 'late', match: (item, today) => !!item.due && item.due < today },
-  { id: 'next', label: 'جاي', tone: '', match: (item, today) => !!item.due && item.due > today },
-  { id: 'none', label: 'من غير معاد', tone: '', match: (item) => !item.due }
+  { id: 'today', label: t("النهاردة"), tone: '', match: (item, today) => item.due === today },
+  { id: 'late', label: t("متأخرة"), tone: 'late', match: (item, today) => !!item.due && item.due < today },
+  { id: 'next', label: t("جاي"), tone: '', match: (item, today) => !!item.due && item.due > today },
+  { id: 'none', label: t("من غير معاد"), tone: '', match: (item) => !item.due }
 ];
 
 function onBoard(item) {
@@ -89,7 +90,7 @@ export const taskListScreen = {
   enter({ restoreKey } = {}) {
     setContext('');
     elements.search.value = '';
-    elements.search.placeholder = 'دوّر على تاسك';
+    elements.search.placeholder = t("دوّر على تاسك");
 
     const rows = orderedItems();
     const index = restoreKey ? rows.findIndex((row) => row.key === restoreKey) : -1;
@@ -126,7 +127,7 @@ export const taskListScreen = {
       at += group.items.length;
     });
 
-    const empty = elements.search.value ? 'مفيش نتايج.' : 'مفيش تاسكات مسندة ليك.';
+    const empty = elements.search.value ? t("مفيش نتايج.") : t("مفيش تاسكات مسندة ليك.");
     paintRows(rows, empty, (item, index, selected) => itemRowHtml(item, selected, index), headers);
     clampSelection();
     setFooterMeta('meta', itemCountMeta());

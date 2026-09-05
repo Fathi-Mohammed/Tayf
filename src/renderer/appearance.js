@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 // بيمسك المظهر على <html>: data-appearance (dark|light) و data-theme و data-font.
 // "زي السيستم" بيتحل هنا مش في الـ CSS — كده بلوك الألوان الفاتح متكتب مرة واحدة.
 
@@ -15,16 +16,16 @@ export const THEMES = [
 ];
 
 export const FONTS = [
-  { value: 'default', label: 'الافتراضي · Cairo و Inter' },
+  { value: 'default', label: t("الافتراضي · Cairo و Inter") },
   { value: 'readex', label: 'Readex Pro' },
-  { value: 'system', label: 'خط الجهاز' }
+  { value: 'system', label: t("خط الجهاز") }
 ];
 
 export const SCALES = [
-  { value: 0.9, label: 'صغيرة · ٩٠٪' },
-  { value: 1, label: 'عادية · ١٠٠٪' },
-  { value: 1.15, label: 'كبيرة · ١١٥٪' },
-  { value: 1.3, label: 'أكبر · ١٣٠٪' }
+  { value: 0.9, label: t("صغيرة · ٩٠٪") },
+  { value: 1, label: t("عادية · ١٠٠٪") },
+  { value: 1.15, label: t("كبيرة · ١١٥٪") },
+  { value: 1.3, label: t("أكبر · ١٣٠٪") }
 ];
 
 export const DEFAULT_THEME = 'tokyo';

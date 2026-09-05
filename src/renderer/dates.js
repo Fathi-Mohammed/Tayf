@@ -1,3 +1,4 @@
+import { t, getLocale } from './i18n.js';
 const WEEKDAYS = {
   الاحد: 0, الأحد: 0, الحد: 0, sun: 0, sunday: 0,
   الاتنين: 1, الإتنين: 1, الاثنين: 1, الإثنين: 1, mon: 1, monday: 1,
@@ -10,16 +11,16 @@ const WEEKDAYS = {
 
 const TODAY_WORDS = /^(النهارده|النهاردة|اليوم|today)$/;
 const TOMORROW_WORDS = /^(بكرة|بكره|غدا|غدًا|tomorrow)$/;
-const DAY_AFTER_WORDS = /^(بعد بكرة|بعد بكره)$/;
+const DAY_AFTER_WORDS = /^(بعد بكرة|بعد بكره|day after tomorrow)$/;
 const DAYS_AHEAD = /^\+?(\d{1,3})$/;
 const ISO = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
 const DAY_MONTH = /^(\d{1,2})[/-](\d{1,2})$/;
 const MINUTES_ONLY = /^\d+(\.\d+)?$/;
 const JIRA_DURATION = /^(\d+(\.\d+)?\s*[wdhm]\s*)+$/;
 
-const UNPARSED_DATE = 'مش فاهم التاريخ ده';
-const INVALID_DATE = 'تاريخ غير صحيح';
-const UNPARSED_ESTIMATE = 'اكتب رقم (دقايق) أو 4h أو 2d أو 1d 4h';
+const UNPARSED_DATE = t("مش فاهم التاريخ ده");
+const INVALID_DATE = t("تاريخ غير صحيح");
+const UNPARSED_ESTIMATE = t("اكتب رقم (دقايق) أو 4h أو 2d أو 1d 4h");
 
 export function toIsoDate(date) {
   const pad = (value) => String(value).padStart(2, '0');
@@ -28,7 +29,7 @@ export function toIsoDate(date) {
 
 export function formatDate(date) {
   try {
-    return date.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+    return date.toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
   } catch {
     return toIsoDate(date);
   }
@@ -87,14 +88,14 @@ export function parseEstimate(input) {
 }
 
 export const DATE_WORDS = [
-  'النهاردة', 'بكرة', 'بعد بكرة',
-  'الأحد', 'الاتنين', 'التلات', 'الأربع', 'الخميس', 'الجمعة', 'السبت'
+  t("النهاردة"), t("بكرة"), t("بعد بكرة"),
+  t("الأحد"), t("الاتنين"), t("التلات"), t("الأربع"), t("الخميس"), t("الجمعة"), t("السبت")
 ];
 
 export const QUICK_DATES = [
-  { key: '1', label: 'النهاردة' },
-  { key: '2', label: 'بكرة' },
-  { key: '3', label: 'بعد بكرة' },
-  { key: '4', label: 'الخميس' },
+  { key: '1', label: t("النهاردة") },
+  { key: '2', label: t("بكرة") },
+  { key: '3', label: t("بعد بكرة") },
+  { key: '4', label: t("الخميس") },
   { key: '5', label: '+7' }
 ];

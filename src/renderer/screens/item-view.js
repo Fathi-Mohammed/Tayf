@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta } from '../chrome.js';
@@ -12,19 +13,19 @@ export function currentDetail() {
 function metaEntries(item, detail) {
   const entries = [
     ['', detail.key],
-    ['النوع', detail.type || '-'],
-    ['الحالة', detail.status || '-'],
-    ['مسندة لـ', detail.assignee || 'مش مسندة']
+    [t("النوع"), detail.type || '-'],
+    [t("الحالة"), detail.status || '-'],
+    [t("مسندة لـ"), detail.assignee || t("مش مسندة")]
   ];
 
   if ((item.boards || []).length) {
-    entries.push(['البورد', item.boards.map((board) => board.name).join('، ')]);
+    entries.push([t("البورد"), item.boards.map((board) => board.name).join(t("، "))]);
   }
-  if (detail.due) entries.push(['التسليم', detail.due]);
-  if (detail.estimate) entries.push(['الوقت', detail.estimate]);
+  if (detail.due) entries.push([t("التسليم"), detail.due]);
+  if (detail.estimate) entries.push([t("الوقت"), detail.estimate]);
 
   Object.values(detail.optionValues || {}).forEach((option) => entries.push(['', option.value]));
-  if ((detail.labels || []).length) entries.push(['labels', detail.labels.join('، ')]);
+  if ((detail.labels || []).length) entries.push(['labels', detail.labels.join(t("، "))]);
 
   return entries;
 }
@@ -38,7 +39,7 @@ export const itemViewScreen = {
 
     elements.vtitle.textContent = item.title || '';
     elements.vmeta.innerHTML = '';
-    elements.vdesc.textContent = 'بيحمّل…';
+    elements.vdesc.textContent = t("بيحمّل…");
     elements.vdesc.className = 'empty';
     setFooterMeta('metav', item.key);
 
@@ -68,7 +69,7 @@ export const itemViewScreen = {
       elements.vdesc.textContent = detail.description;
       elements.vdesc.className = '';
     } else {
-      elements.vdesc.textContent = 'مفيش وصف للتاسك دي.';
+      elements.vdesc.textContent = t("مفيش وصف للتاسك دي.");
       elements.vdesc.className = 'empty';
     }
   },
