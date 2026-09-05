@@ -65,7 +65,9 @@ async function fetchItem(client, key) {
 
 async function updateItem(client, key, fields) {
   const payload = { ...fields };
-  if (typeof payload.description === 'string') {
+  if (payload.description && payload.description.blocks) {
+    payload.description = documentFromRich(payload.description);
+  } else if (typeof payload.description === 'string') {
     payload.description = textToDocument(payload.description);
   }
   await client.put(`/rest/api/3/issue/${encodeURIComponent(key)}`, { fields: payload });
@@ -119,7 +121,10 @@ async function createItem(client, draft) {
 
   if (draft.assigneeId) fields.assignee = { accountId: draft.assigneeId };
 
-  const description = textToDocument(draft.description);
+  const description =
+    draft.description && draft.description.blocks
+      ? documentFromRich(draft.description)
+      : textToDocument(draft.description);
   if (description) fields.description = description;
   if (draft.due) fields.duedate = draft.due;
   if (draft.estimate) fields.timetracking = { originalEstimate: draft.estimate };

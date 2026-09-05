@@ -6,10 +6,13 @@ const BLOCK_SEPARATORS = {
   codeBlock: '\n\n',
   mediaSingle: '\n\n',
   mediaGroup: '\n\n',
+  panel: '\n\n',
+  table: '\n\n',
+  tableHeader: '  ·  ',
+  tableCell: '  ·  ',
   listItem: '\n'
 };
 const MEDIA_NODES = new Set(['media', 'mediaInline']);
-const PLAIN_NODES = new Set(['doc', 'paragraph', 'text', 'hardBreak']);
 const NESTED_INDENT = '\n  ';
 const ISOLATE_START = '\u2068';
 const ISOLATE_END = '\u2069';
@@ -18,6 +21,7 @@ const { richFromDocument } = require('./rich-text');
 const CUSTOM_FIELD = /^customfield_/;
 const RECENT_COMMENTS = 5;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const CELL_TAIL = /\s*·\s*$/;
 
 function toWorkItem(issue) {
   const fields = issue.fields || {};
@@ -92,6 +96,9 @@ function documentToText(node) {
     return String((node.attrs && (node.attrs.text || node.attrs.shortName)) || '');
   }
   if (MEDIA_NODES.has(node.type)) return mediaText(node);
+  if (node.type === 'tableRow') {
+    return `${(node.content || []).map(documentToText).join('').replace(CELL_TAIL, '')}\n`;
+  }
   if (node.type === 'blockquote') return quoteText(node);
   if (node.type === 'bulletList') return listText(node.content, () => '• ');
   if (node.type === 'orderedList') return listText(node.content, (item, index) => `${index + 1}. `);
@@ -105,13 +112,6 @@ function documentToText(node) {
   const separator = BLOCK_SEPARATORS[node.type];
   if (!separator) return text;
   return text.replace(/\n+$/, '') + separator;
-}
-
-function isRichDocument(node) {
-  if (!node || typeof node !== 'object') return false;
-  if (node.type && !PLAIN_NODES.has(node.type)) return true;
-  if ((node.marks || []).length) return true;
-  return (node.content || []).some(isRichDocument);
 }
 
 function inlineNodes(line, mentions) {
@@ -212,7 +212,7 @@ function toWorkItemDetail(issue) {
   return {
     ...toWorkItem(issue),
     description: documentToText(fields.description).trim(),
-    descriptionIsRich: isRichDocument(fields.description),
+    descriptionDoc: richFromDocument(fields.description),
     labels: fields.labels || [],
     typeId: (fields.issuetype && fields.issuetype.id) || null,
     optionValues: customOptionValues(fields),
@@ -249,6 +249,5 @@ module.exports = {
   toComment,
   toTransition,
   documentToText,
-  isRichDocument,
   textToDocument
 };

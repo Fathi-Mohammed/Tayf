@@ -3,7 +3,7 @@ import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
 import { escapeHtml, relativeTime } from '../format.js';
 import { installEditor, readDoc, writeDoc, clearEditor, isEmpty, focusEditor } from '../editor.js';
-import { resetMentions } from '../mention-picker.js';
+import { resetMentions, attachMentions } from '../mention-picker.js';
 
 const context = { detail: null, requestId: 0, sending: false };
 
@@ -167,3 +167,4 @@ export const itemViewScreen = {
 };
 
 installEditor(elements.vcin);
+attachMentions(elements.vcin);

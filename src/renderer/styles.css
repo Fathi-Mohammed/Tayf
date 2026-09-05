@@ -949,39 +949,44 @@
   .vcom .vbody {
     font-size: var(--fs-callout); line-height: var(--lh-relaxed); color: var(--text-3);
   }
-  #vcin {
-    position: relative; width: 100%; margin-top: var(--sp-5); padding: var(--sp-4);
+  .editor {
+    position: relative; width: 100%; padding: var(--sp-4);
     min-height: 46px; max-height: 200px; overflow-y: auto;
     background-color: var(--fill); border: 1px solid transparent; border-radius: var(--r-3);
     color: var(--text); font-family: var(--sans); font-size: var(--fs-body);
     line-height: var(--lh-normal); outline: none;
   }
-  #vcin:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
-  #vcin.blank::before {
+  #vcin { margin-top: var(--sp-5); }
+  .editor:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
+  .editor[contenteditable='false'] {
+    color: var(--muted); background-color: var(--fill-3); border-color: var(--line);
+  }
+  .editor.blank::before {
     content: attr(data-placeholder); position: absolute; pointer-events: none;
     top: var(--sp-4); inset-inline-start: var(--sp-4); color: var(--dim);
   }
 
-  #vcin p, #vcin h1, #vcin h2, #vcin h3, #vcin ul, #vcin ol, #vcin blockquote, #vcin pre,
+  .editor p, .editor h1, .editor h2, .editor h3, .editor ul, .editor ol,
+  .editor blockquote, .editor pre,
   .vbody p, .vbody h1, .vbody h2, .vbody h3, .vbody ul, .vbody ol, .vbody blockquote, .vbody pre {
     margin: 0 0 var(--sp-3);
   }
-  #vcin > *:last-child, .vbody > *:last-child { margin-bottom: 0; }
-  #vcin h1, .vbody h1 { font-size: var(--fs-title3); }
-  #vcin h2, .vbody h2, #vcin h3, .vbody h3 { font-size: var(--fs-body); }
-  #vcin ul, .vbody ul, #vcin ol, .vbody ol { padding-inline-start: var(--sp-6); }
-  #vcin li, .vbody li { margin-bottom: var(--sp-1); }
-  #vcin blockquote, .vbody blockquote {
+  .editor > *:last-child, .vbody > *:last-child { margin-bottom: 0; }
+  .editor h1, .vbody h1 { font-size: var(--fs-title3); }
+  .editor h2, .vbody h2, .editor h3, .vbody h3 { font-size: var(--fs-body); }
+  .editor ul, .vbody ul, .editor ol, .vbody ol { padding-inline-start: var(--sp-6); }
+  .editor li, .vbody li { margin-bottom: var(--sp-1); }
+  .editor blockquote, .vbody blockquote {
     padding-inline-start: var(--sp-4); border-inline-start: 2px solid var(--line); color: var(--muted);
   }
-  #vcin pre, .vbody pre, #vcin code, .vbody code {
+  .editor pre, .vbody pre, .editor code, .vbody code {
     font-family: var(--mono); font-size: var(--fs-subheadline);
   }
-  #vcin pre, .vbody pre {
+  .editor pre, .vbody pre {
     padding: var(--sp-3) var(--sp-4); border-radius: var(--r-2);
     background: var(--fill-3); white-space: pre-wrap;
   }
-  #vcin a, .vbody a { color: var(--accent); }
+  .editor a, .vbody a { color: var(--accent); }
 
   .men {
     padding: 0 var(--sp-2); border-radius: var(--r-2); unicode-bidi: isolate;
@@ -1006,18 +1011,6 @@
   }
   .mrow.on { background: var(--accent-bg); color: var(--accent); }
 
-  .cgrid textarea {
-    width: 100%; padding: var(--sp-4); resize: none;
-    background-color: var(--fill);
-    border: 1px solid transparent; border-radius: var(--r-3);
-    color: var(--text); font-size: var(--fs-body); font-family: var(--sans);
-    line-height: var(--lh-normal); outline: none;
-  }
-  .cgrid textarea:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
-  .cgrid textarea[readonly] {
-    color: var(--muted); background-color: var(--fill-3); border-color: var(--line);
-  }
-  .cgrid textarea::placeholder { color: var(--dim); }
   .cgrid label.top { align-self: start; padding-top: var(--sp-4); }
 
   #cdesc {

@@ -12,6 +12,7 @@ const usersByProject = new Map();
 const picker = {
   open: false,
   projectKey: null,
+  element: null,
   matches: [],
   highlighted: 0,
   spot: null
@@ -30,6 +31,7 @@ export function closePicker() {
   picker.open = false;
   picker.matches = [];
   picker.spot = null;
+  picker.element = null;
   elements.mentions.innerHTML = '';
   elements.mentions.style.display = 'none';
 }
@@ -45,12 +47,12 @@ async function knownUsers() {
   return users;
 }
 
-function caretSpot() {
+function caretSpot(element) {
   const selection = document.getSelection();
   if (!selection || !selection.isCollapsed) return null;
 
   const node = selection.anchorNode;
-  if (!node || node.nodeType !== Node.TEXT_NODE || !elements.vcin.contains(node)) return null;
+  if (!node || node.nodeType !== Node.TEXT_NODE || !element.contains(node)) return null;
 
   const before = node.nodeValue.slice(0, selection.anchorOffset);
   const typed = TRIGGER.exec(before);
@@ -65,7 +67,7 @@ function caretSpot() {
 }
 
 function place() {
-  const box = elements.vcin.getBoundingClientRect();
+  const box = picker.element.getBoundingClientRect();
   const height = elements.mentions.offsetHeight || FALLBACK_HEIGHT;
 
   elements.mentions.style.left = `${box.left}px`;
@@ -92,7 +94,7 @@ export function movePicker(delta) {
 
 export function choosePicker() {
   const user = picker.matches[picker.highlighted];
-  const spot = picker.spot;
+  const { spot } = picker;
   if (!user || !spot) {
     closePicker();
     return;
@@ -106,7 +108,7 @@ export function choosePicker() {
   const chip = mentionChip(user.accountId, `@${user.name}`);
   range.insertNode(chip);
 
-  const tail = document.createTextNode(' ');
+  const tail = document.createTextNode(' ');
   chip.after(tail);
 
   const caret = document.createRange();
@@ -120,8 +122,8 @@ export function choosePicker() {
   closePicker();
 }
 
-async function onInput() {
-  const spot = caretSpot();
+async function onInput(element) {
+  const spot = caretSpot(element);
   if (!spot) {
     closePicker();
     return;
@@ -137,6 +139,7 @@ async function onInput() {
     return;
   }
 
+  picker.element = element;
   picker.spot = spot;
   picker.matches = matches;
   picker.highlighted = 0;
@@ -144,8 +147,10 @@ async function onInput() {
   draw();
 }
 
-elements.vcin.addEventListener('input', onInput);
-elements.vcin.addEventListener('blur', () => closePicker());
+export function attachMentions(element) {
+  element.addEventListener('input', () => onInput(element));
+  element.addEventListener('blur', () => closePicker());
+}
 
 elements.mentions.addEventListener('mousedown', (event) => {
   const row = event.target.closest('.mrow');

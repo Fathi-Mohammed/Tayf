@@ -8,7 +8,6 @@ const {
   toWorkItemDetail,
   toTransition,
   documentToText,
-  isRichDocument,
   textToDocument
 } = require('../src/providers/jira/mappers');
 
@@ -265,21 +264,6 @@ test('documentToText shows which task list items are ticked', () => {
     ]
   };
   assert.equal(documentToText(document).trim(), '[x] shipped\n[ ] pending');
-});
-
-test('isRichDocument tells a plain document from one we cannot rebuild', () => {
-  assert.equal(isRichDocument(textToDocument('one\ntwo\n\nthree')), false);
-  assert.equal(isRichDocument(null), false);
-  assert.equal(
-    isRichDocument({
-      type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'bold', marks: [{ type: 'strong' }] }] }
-      ]
-    }),
-    true
-  );
-  assert.equal(isRichDocument({ type: 'doc', content: [{ type: 'bulletList', content: [] }] }), true);
 });
 
 test('textToDocument turns picked names into real mentions, longest first', () => {

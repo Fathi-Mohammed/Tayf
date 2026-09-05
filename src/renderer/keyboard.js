@@ -169,13 +169,15 @@ function handleTransitionForm(event, key) {
 }
 
 function handleCompose(event, key) {
+  if (mentionIsOpen()) return handleMention(event);
+
   if (event.key === 'Escape') {
     event.preventDefault();
     backToTaskList();
     return true;
   }
   if (event.key === 'Enter') {
-    if (event.target === elements.cdescin && !hasCommandModifier(event)) return true;
+    if (elements.cdescin.contains(event.target) && !hasCommandModifier(event)) return true;
     event.preventDefault();
     submitCompose();
     return true;

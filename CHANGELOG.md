@@ -26,6 +26,21 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
   of which an overlay has any use for. Cut, copy, paste and select-all keep their
   roles, which is where macOS gets those keys from.
 
+- **A real editor, not a text box.** Comments and descriptions are written in a small
+  rich text editor: bold, italic, inline code, bullet and numbered lists, headings and
+  quotes, with `- `, `1. `, `# ` and `> ` turning into them as you type. Mentions are
+  chips, so a space in a name cannot break one and half of it cannot be deleted.
+
+  It writes a neutral document — paragraphs, headings, lists, quotes, code, and spans
+  carrying bold, italic, code, link or mention — which the Jira layer maps to ADF and
+  back. The renderer never learns what ADF is, and reading uses the same pair of
+  functions as writing, so a comment written in Jira arrives with its formatting.
+
+  Descriptions go through the same editor, which is what finally makes editing one
+  safe: the bullets and headings that used to be flattened on save now survive it. A
+  description holding a table, an image or a panel is still locked, because those are
+  shapes this editor cannot carry.
+
 ### Fixed
 
 - Leaving the create form and coming back to it lost the custom date and option rows.
