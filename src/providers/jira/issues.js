@@ -46,13 +46,19 @@ async function fetchAssignedItems(client) {
   }
 }
 
-async function fetchComments(client, key) {
+const OLDER_COMMENTS = 10;
+
+async function fetchComments(client, key, startAt = 0, count = RECENT_COMMENTS) {
   const page = await client.get(
     `/rest/api/3/issue/${encodeURIComponent(key)}/comment` +
-      `?orderBy=-created&maxResults=${RECENT_COMMENTS}`
+      `?orderBy=-created&startAt=${startAt}&maxResults=${count}`
   );
   const comments = (page.comments || []).map(toComment).reverse();
-  return { comments, commentTotal: Number(page.total) || comments.length };
+  return { comments, commentTotal: Number(page.total) || startAt + comments.length };
+}
+
+function fetchOlderComments(client, key, loaded) {
+  return fetchComments(client, key, Math.max(0, loaded), OLDER_COMMENTS);
 }
 
 async function fetchItem(client, key) {
@@ -143,6 +149,7 @@ module.exports = {
   ASSIGNED_AND_OPEN,
   fetchAssignedItems,
   fetchItem,
+  fetchOlderComments,
   updateItem,
   addComment,
   fetchTransitions,

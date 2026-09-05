@@ -83,6 +83,13 @@ function register({ workspace, overlay, settings, actions }) {
     )
   );
 
+  ipcMain.handle('item:comments', (_event, { key, loaded }) =>
+    fromProvider(
+      (jira) => jira.olderComments(key, loaded),
+      (page) => page
+    )
+  );
+
   ipcMain.handle('item:transition', async (_event, request) => {
     if (!provider()) return notConfigured();
 

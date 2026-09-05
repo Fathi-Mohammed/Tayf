@@ -62,7 +62,27 @@ export function relativeTime(timestamp) {
   const seconds = Math.round((Date.now() - timestamp) / 1000);
   if (seconds < 60) return 'الآن';
   if (seconds < 3600) return `من ${Math.round(seconds / 60)}د`;
-  return `من ${Math.round(seconds / 3600)}س`;
+  if (seconds < DAY_SECONDS) return `من ${Math.round(seconds / 3600)}س`;
+  if (seconds < 7 * DAY_SECONDS) return daysAgo(Math.round(seconds / DAY_SECONDS));
+  return dayAndMonth(timestamp);
+}
+
+function daysAgo(days) {
+  if (days <= 1) return 'من يوم';
+  if (days === 2) return 'من يومين';
+  return `من ${days} أيام`;
+}
+
+// كومنت من شهرين "من 1400س" مبيقولش حاجة — بعد أسبوع بنكتب التاريخ نفسه.
+function dayAndMonth(timestamp) {
+  try {
+    return new Date(timestamp).toLocaleDateString('ar-EG-u-nu-latn', {
+      day: 'numeric',
+      month: 'short'
+    });
+  } catch {
+    return '';
+  }
 }
 
 const PRIORITY_LEVELS = [

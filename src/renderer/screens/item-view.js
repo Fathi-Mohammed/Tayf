@@ -1,7 +1,7 @@
 import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
-import { escapeHtml, relativeTime } from '../format.js';
+import { escapeHtml, relativeTime, UNTITLED } from '../format.js';
 import {
   installEditor,
   readDoc,
@@ -18,7 +18,7 @@ import {
   peopleFor
 } from '../mention-picker.js';
 
-const context = { detail: null, requestId: 0, sending: false };
+const context = { detail: null, requestId: 0, sending: false, loadingOlder: false };
 
 export function currentDetail() {
   return context.detail;
@@ -29,13 +29,40 @@ function imagesOf(detail) {
   return (block) => byName.get(block.name) || '';
 }
 
-function commentNode(comment, resolve) {
-  const when = comment.at ? relativeTime(Date.parse(comment.at)) : '';
-  const box = document.createElement('div');
-  box.className = 'vcom';
+// أول حرف من أول كلمتين في الاسم — بديل الصورة الشخصية، وكفاية عشان تفرّق
+// بين اللي بيتكلموا وإنت بتقرا سريع.
+function initialsOf(name) {
+  const words = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return '؟';
+  return words.slice(0, 2).map((word) => [...word][0]).join('');
+}
 
-  const head = document.createElement('b');
-  head.textContent = [comment.author, when].filter(Boolean).join('  ·  ');
+function isMine(comment) {
+  const me = state.workspace.user;
+  if (!me) return false;
+  if (comment.authorId && me.accountId) return comment.authorId === me.accountId;
+  return !!comment.author && comment.author === me.name;
+}
+
+function commentNode(comment, resolve) {
+  const box = document.createElement('div');
+  box.className = isMine(comment) ? 'vcom mine' : 'vcom';
+
+  const face = document.createElement('div');
+  face.className = 'vwho';
+  face.textContent = initialsOf(comment.author);
+
+  const said = document.createElement('div');
+  said.className = 'vsaid';
+
+  const head = document.createElement('div');
+  head.className = 'vwhen';
+  const who = document.createElement('b');
+  who.dir = 'auto';
+  who.textContent = comment.author || 'مش معروف';
+  const when = document.createElement('i');
+  when.textContent = comment.at ? relativeTime(Date.parse(comment.at)) : '';
+  head.append(who, when);
 
   const body = document.createElement('div');
   body.className = 'vbody';
@@ -44,32 +71,104 @@ function commentNode(comment, resolve) {
   if (comment.doc) writeDoc(body, comment.doc);
   else body.textContent = comment.text || '';
 
-  box.append(head, body);
+  said.append(head, body);
+  box.append(face, said);
   return box;
 }
 
-function captionOf(detail, shown) {
-  const older = (detail.commentTotal || shown) - shown;
-  if (!shown) return 'مفيش كومنتات لسه';
-  return older > 0 ? `فيه ${older} كومنت أقدم في جيرا` : '';
+function countText(shown, total) {
+  if (!total) return '';
+  return shown < total ? `${shown} من ${total}` : String(total);
 }
 
-function renderComments(detail) {
+function moreText(older) {
+  if (older === 1) return 'اعرض الكومنت الأقدم';
+  if (older === 2) return 'اعرض الكومنتين الأقدم';
+  if (older <= 10) return `اعرض ${older} كومنتات أقدم`;
+  return `اعرض ${older} كومنت أقدم`;
+}
+
+function paintMore(detail) {
+  const shown = detail ? (detail.comments || []).length : 0;
+  const older = detail ? Math.max(0, (detail.commentTotal || shown) - shown) : 0;
+
+  elements.vmore.style.display = older ? 'block' : 'none';
+  elements.vmore.disabled = context.loadingOlder;
+  elements.vmore.textContent = context.loadingOlder ? 'بيحمّل…' : moreText(older);
+}
+
+// الصور بتوصل بعد ما الكومنتات تترسم وبتزوّد الطول، فبنمسك المسافة من تحت
+// ونرجّعها بعد كل صورة تخلص — كده اللي بتقراه ما بيتزقّش من تحت إيدك. أول ما
+// تسكرول بنفسك بنسيب التثبيت خالص.
+let anchor = null;
+
+function applyAnchor() {
+  if (anchor === null) return;
+  elements.vscroll.scrollTop = elements.vscroll.scrollHeight - anchor;
+}
+
+function holdScroll(fromBottom) {
+  anchor = fromBottom;
+  applyAnchor();
+  elements.vscroll.querySelectorAll('img').forEach((image) => {
+    if (!image.complete) image.addEventListener('load', applyAnchor, { once: true });
+  });
+}
+
+function renderComments(detail, { toNewest = false } = {}) {
+  anchor = null;
   elements.vcomments.innerHTML = '';
+  elements.vcount.textContent = '';
+  paintMore(detail);
   if (!detail) return;
 
   const comments = detail.comments || [];
-  const caption = captionOf(detail, comments.length);
+  elements.vcount.textContent = countText(comments.length, detail.commentTotal || comments.length);
 
-  if (caption) {
+  if (!comments.length) {
     const line = document.createElement('div');
-    line.className = 'vcold';
-    line.textContent = caption;
+    line.className = 'vempty';
+    line.textContent = 'مفيش كومنتات لسه — ابدأ إنت.';
     elements.vcomments.appendChild(line);
+    return;
   }
 
   const resolve = imagesOf(detail);
   comments.forEach((comment) => elements.vcomments.appendChild(commentNode(comment, resolve)));
+  if (toNewest) holdScroll(elements.vscroll.clientHeight);
+}
+
+// الأقدم بيتزق فوق القايمة، فبنثبّت على المسافة من تحت — اللي بتقراه يفضل مكانه.
+async function loadOlder() {
+  const { detail } = context;
+  if (!detail || context.loadingOlder) return;
+
+  context.loadingOlder = true;
+  paintMore(detail);
+
+  const before = elements.vscroll.scrollHeight - elements.vscroll.scrollTop;
+  const response = await window.tayf.olderComments({
+    key: detail.key,
+    loaded: (detail.comments || []).length
+  });
+
+  context.loadingOlder = false;
+  if (context.detail !== detail) return;
+
+  if (response.error) {
+    setFlash(escapeHtml(response.error), 'bad');
+    paintMore(detail);
+    return;
+  }
+
+  const known = new Set((detail.comments || []).map((one) => one.id));
+  const older = (response.comments || []).filter((one) => !known.has(one.id));
+  detail.comments = [...older, ...(detail.comments || [])];
+  if (response.commentTotal) detail.commentTotal = response.commentTotal;
+  if (!older.length) detail.commentTotal = detail.comments.length;
+
+  renderComments(detail);
+  holdScroll(before);
 }
 
 const PEOPLE_SHOWN = 4;
@@ -118,7 +217,7 @@ export async function sendComment() {
   resetMentions(detail.projectKey);
   detail.comments = [...(detail.comments || []), response.comment];
   detail.commentTotal = (detail.commentTotal || 0) + 1;
-  renderComments(detail);
+  renderComments(detail, { toNewest: true });
   setFlash(`اتبعت كومنت · <b>${escapeHtml(detail.key)}</b>`, 'done');
 }
 
@@ -147,9 +246,10 @@ export const itemViewScreen = {
 
   async enter({ item }) {
     context.detail = null;
+    context.loadingOlder = false;
     setContext('');
 
-    elements.vtitle.textContent = item.title || '';
+    elements.vtitle.textContent = item.title || UNTITLED;
     elements.vmeta.innerHTML = '';
     elements.vdesc.textContent = 'بيحمّل…';
     elements.vdesc.className = 'empty';
@@ -182,7 +282,7 @@ export const itemViewScreen = {
         return response.error ? null : response.file;
       }
     });
-    elements.vtitle.textContent = detail.title;
+    elements.vtitle.textContent = detail.title || UNTITLED;
     elements.vmeta.innerHTML = metaEntries(item, detail)
       .map(
         ([label, value]) =>
@@ -198,13 +298,14 @@ export const itemViewScreen = {
       elements.vdesc.className = 'empty';
     }
 
-    renderComments(detail);
+    renderComments(detail, { toNewest: true });
     renderPeople(detail);
   },
 
   leave() {
     context.requestId += 1;
     context.detail = null;
+    context.loadingOlder = false;
     resetMentions(null);
     clearEditor(elements.vcin);
     renderComments(null);
@@ -219,3 +320,7 @@ export const itemViewScreen = {
 
 installEditor(elements.vcin);
 attachMentions(elements.vcin);
+elements.vmore.addEventListener('click', loadOlder);
+elements.vscroll.addEventListener('wheel', () => {
+  anchor = null;
+});

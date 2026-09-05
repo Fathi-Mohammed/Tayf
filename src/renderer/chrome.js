@@ -15,6 +15,7 @@ const SCREEN_PARTS = {
 };
 
 const ALL_ROOTS = ['list', 'msg', 'create', 'view', 'settings', 'finish'];
+const ROOT_DISPLAY = { view: 'flex' };
 const ALL_FOOTERS = ['foot', 'footc', 'footd', 'footv', 'foots', 'footf'];
 
 let flash = null;
@@ -32,11 +33,12 @@ export function showLayout(layoutName) {
 
   const onBoard = !!layout.board && state.workspace.configured;
   elements.stage.classList.toggle('wide', onBoard);
+  elements.panel.classList.toggle('split', layoutName === 'itemView');
   setVisible(elements.bar, layout.bar, 'flex');
   setVisible(elements.boardbar, onBoard, 'flex');
   if (!onBoard) setVisible(elements.side, false);
   setVisible(elements[layout.footer], true, 'flex');
-  layout.roots.forEach((id) => setVisible(elements[id], true));
+  layout.roots.forEach((id) => setVisible(elements[id], true, ROOT_DISPLAY[id] || 'block'));
 }
 
 export function setContext(html) {

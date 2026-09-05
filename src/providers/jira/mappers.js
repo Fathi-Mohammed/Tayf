@@ -196,6 +196,7 @@ function toComment(comment) {
   return {
     id: (comment && comment.id) || null,
     author: (comment && comment.author && comment.author.displayName) || '',
+    authorId: (comment && comment.author && comment.author.accountId) || null,
     at: (comment && comment.created) || null,
     text: documentToText(body).trim(),
     doc: richFromDocument(body)

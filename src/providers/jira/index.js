@@ -39,6 +39,10 @@ class JiraProvider {
     return issues.updateItem(this.client, key, fields);
   }
 
+  olderComments(key, loaded) {
+    return issues.fetchOlderComments(this.client, key, loaded);
+  }
+
   addComment(key, doc) {
     return issues.addComment(this.client, key, doc);
   }

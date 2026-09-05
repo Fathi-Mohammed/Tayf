@@ -331,14 +331,27 @@
     </div>
 
     <div id="view">
-      <div id="vtitle"></div>
-      <div id="vmeta"></div>
-      <div id="vdesc"></div>
-      <div id="vcomments"></div>
-      <div id="vcin" class="editor" contenteditable="true" spellcheck="false" dir="auto"
-        data-placeholder="اكتب كومنت — Ctrl+Enter يبعته"></div>
-      <div id="vpeople"></div>
+      <div id="vmain">
+        <div id="vtitle"></div>
+        <div id="vmeta"></div>
+        <div id="vdesc"></div>
+      </div>
 
+      <div id="vside">
+        <div id="vhead">
+          <span class="vname">الكومنتات</span>
+          <span id="vcount"></span>
+        </div>
+        <div id="vscroll">
+          <button id="vmore" type="button"></button>
+          <div id="vcomments"></div>
+        </div>
+        <div id="vcompose">
+          <div id="vcin" class="editor" contenteditable="true" spellcheck="false" dir="auto"
+            data-placeholder="اكتب كومنت — Ctrl+Enter يبعته"></div>
+          <div id="vpeople"></div>
+        </div>
+      </div>
     </div>
 
     <div id="create">
