@@ -26,6 +26,14 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
   of which an overlay has any use for. Cut, copy, paste and select-all keep their
   roles, which is where macOS gets those keys from.
 
+- **The editor grew a toolbar and the rest of Jira's formatting.** Underline,
+  strikethrough and task lists join bold, italic, code, lists, headings and quotes, on
+  the same keys Jira uses — `Ctrl+U`, `Ctrl+Shift+S`, `Ctrl+Shift+M`, and
+  `Ctrl+Shift+8` / `7` / `6`. A row of buttons sits above both editors for the same
+  ten commands, `[] ` starts a task list and its boxes tick by clicking, and the task
+  list carries the `localId` that Jira rejects the document without. Under the comment
+  box there is a row of one-click names, the way Jira offers the people on the issue.
+
 - **A real editor, not a text box.** Comments and descriptions are written in a small
   rich text editor: bold, italic, inline code, bullet and numbered lists, headings and
   quotes, with `- `, `1. `, `# ` and `> ` turning into them as you type. Mentions are

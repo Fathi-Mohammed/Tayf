@@ -92,19 +92,7 @@ export function movePicker(delta) {
   draw();
 }
 
-export function choosePicker() {
-  const user = picker.matches[picker.highlighted];
-  const { spot } = picker;
-  if (!user || !spot) {
-    closePicker();
-    return;
-  }
-
-  const range = document.createRange();
-  range.setStart(spot.node, spot.at);
-  range.setEnd(spot.node, spot.end);
-  range.deleteContents();
-
+function dropChip(range, user) {
   const chip = mentionChip(user.accountId, `@${user.name}`);
   range.insertNode(chip);
 
@@ -118,8 +106,45 @@ export function choosePicker() {
   const selection = document.getSelection();
   selection.removeAllRanges();
   selection.addRange(caret);
+}
 
+export function choosePicker() {
+  const user = picker.matches[picker.highlighted];
+  const { spot } = picker;
+  if (!user || !spot) {
+    closePicker();
+    return;
+  }
+
+  const range = document.createRange();
+  range.setStart(spot.node, spot.at);
+  range.setEnd(spot.node, spot.end);
+  range.deleteContents();
+  dropChip(range, user);
   closePicker();
+}
+
+export function insertMention(element, user) {
+  element.focus();
+
+  const selection = document.getSelection();
+  const inside =
+    selection && selection.rangeCount && element.contains(selection.anchorNode)
+      ? selection.getRangeAt(0)
+      : null;
+
+  const range = inside || document.createRange();
+  if (!inside) {
+    range.selectNodeContents(element);
+    range.collapse(false);
+  }
+  range.deleteContents();
+  dropChip(range, user);
+}
+
+export function peopleFor(projectKey) {
+  picker.projectKey = projectKey || picker.projectKey;
+  return knownUsers();
 }
 
 async function onInput(element) {

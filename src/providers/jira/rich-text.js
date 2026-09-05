@@ -1,7 +1,23 @@
 'use strict';
 
-const MARK_NAMES = { bold: 'strong', italic: 'em', code: 'code' };
-const LIST_NODES = { true: 'orderedList', false: 'bulletList' };
+const { randomUUID } = require('node:crypto');
+
+const MARK_NAMES = {
+  bold: 'strong',
+  italic: 'em',
+  underline: 'underline',
+  strike: 'strike',
+  code: 'code'
+};
+const MARK_FIELDS = {
+  strong: 'bold',
+  em: 'italic',
+  underline: 'underline',
+  strike: 'strike',
+  code: 'code'
+};
+const LIST_NODES = { bullet: 'bulletList', ordered: 'orderedList', task: 'taskList' };
+const LIST_VARIANTS = { bulletList: 'bullet', orderedList: 'ordered', taskList: 'task' };
 const KNOWN_NODES = new Set([
   'doc',
   'paragraph',
@@ -10,12 +26,14 @@ const KNOWN_NODES = new Set([
   'codeBlock',
   'bulletList',
   'orderedList',
+  'taskList',
   'listItem',
+  'taskItem',
   'text',
   'hardBreak',
   'mention'
 ]);
-const SUPPORTED_MARKS = new Set(['strong', 'em', 'code', 'link']);
+const SUPPORTED_MARKS = new Set(Object.values(MARK_NAMES).concat('link'));
 const MAX_HEADING = 3;
 
 function spanMarks(span) {
@@ -31,10 +49,7 @@ function spanToNode(span) {
   if (!span) return null;
   if (span.br) return { type: 'hardBreak' };
   if (span.mention) {
-    return {
-      type: 'mention',
-      attrs: { id: span.mention.id, text: span.mention.label }
-    };
+    return { type: 'mention', attrs: { id: span.mention.id, text: span.mention.label } };
   }
 
   const text = String(span.text == null ? '' : span.text);
@@ -54,26 +69,37 @@ function spansToText(spans) {
     .join('');
 }
 
-function listItemNode(spans) {
-  return {
-    type: 'listItem',
-    content: [{ type: 'paragraph', content: spansToNodes(spans) }]
-  };
+function itemNode(item, variant) {
+  const content = spansToNodes(item.spans);
+  if (!content.length) return null;
+
+  if (variant === 'task') {
+    return {
+      type: 'taskItem',
+      attrs: { localId: randomUUID(), state: item.done ? 'DONE' : 'TODO' },
+      content
+    };
+  }
+  return { type: 'listItem', content: [{ type: 'paragraph', content }] };
+}
+
+function listNode(block) {
+  const variant = block.variant || 'bullet';
+  const items = (block.items || []).map((item) => itemNode(item, variant)).filter(Boolean);
+  if (!items.length) return null;
+
+  const node = { type: LIST_NODES[variant] || LIST_NODES.bullet, content: items };
+  if (variant === 'task') node.attrs = { localId: randomUUID() };
+  return node;
 }
 
 function blockToNode(block) {
   if (!block) return null;
-
-  if (block.kind === 'list') {
-    const items = (block.items || []).map(listItemNode).filter((item) => item.content[0].content.length);
-    if (!items.length) return null;
-    return { type: LIST_NODES[String(!!block.ordered)], content: items };
-  }
+  if (block.kind === 'list') return listNode(block);
 
   if (block.kind === 'code') {
     const text = String(block.text || '');
-    if (!text.trim()) return null;
-    return { type: 'codeBlock', content: [{ type: 'text', text }] };
+    return text.trim() ? { type: 'codeBlock', content: [{ type: 'text', text }] } : null;
   }
 
   const content = spansToNodes(block.spans);
@@ -99,7 +125,9 @@ function richTextOf(doc) {
   return ((doc && doc.blocks) || [])
     .map((block) => {
       if (block.kind === 'code') return String(block.text || '');
-      if (block.kind === 'list') return (block.items || []).map(spansToText).join('\n');
+      if (block.kind === 'list') {
+        return (block.items || []).map((item) => spansToText(item.spans)).join('\n');
+      }
       return spansToText(block.spans);
     })
     .join('\n')
@@ -109,9 +137,7 @@ function richTextOf(doc) {
 function markedSpan(node) {
   const span = { text: node.text || '' };
   (node.marks || []).forEach((mark) => {
-    if (mark.type === 'strong') span.bold = true;
-    if (mark.type === 'em') span.italic = true;
-    if (mark.type === 'code') span.code = true;
+    if (MARK_FIELDS[mark.type]) span[MARK_FIELDS[mark.type]] = true;
     if (mark.type === 'link') span.link = (mark.attrs && mark.attrs.href) || '';
   });
   return span;
@@ -135,6 +161,12 @@ function innerSpans(node) {
   });
 }
 
+function itemFromNode(node) {
+  const item = { spans: nodeToSpans(node) };
+  if (node.type === 'taskItem') item.done = (node.attrs && node.attrs.state) === 'DONE';
+  return item;
+}
+
 function nodeToBlock(node) {
   if (node.type === 'heading') {
     return {
@@ -147,11 +179,11 @@ function nodeToBlock(node) {
   if (node.type === 'codeBlock') {
     return { kind: 'code', text: (node.content || []).map((child) => child.text || '').join('') };
   }
-  if (node.type === 'bulletList' || node.type === 'orderedList') {
+  if (LIST_VARIANTS[node.type]) {
     return {
       kind: 'list',
-      ordered: node.type === 'orderedList',
-      items: (node.content || []).map(nodeToSpans)
+      variant: LIST_VARIANTS[node.type],
+      items: (node.content || []).map(itemFromNode)
     };
   }
   return { kind: 'paragraph', spans: nodeToSpans(node) };

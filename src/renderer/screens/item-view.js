@@ -3,7 +3,12 @@ import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
 import { escapeHtml, relativeTime } from '../format.js';
 import { installEditor, readDoc, writeDoc, clearEditor, isEmpty, focusEditor } from '../editor.js';
-import { resetMentions, attachMentions } from '../mention-picker.js';
+import {
+  resetMentions,
+  attachMentions,
+  insertMention,
+  peopleFor
+} from '../mention-picker.js';
 
 const context = { detail: null, requestId: 0, sending: false };
 
@@ -50,6 +55,26 @@ function renderComments(detail) {
   }
 
   comments.forEach((comment) => elements.vcomments.appendChild(commentNode(comment)));
+}
+
+const PEOPLE_SHOWN = 4;
+
+async function renderPeople(detail) {
+  elements.vpeople.innerHTML = '';
+  const users = await peopleFor(detail.projectKey);
+  if (context.detail !== detail) return;
+
+  users.slice(0, PEOPLE_SHOWN).forEach((user) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dir = 'auto';
+    button.textContent = `+ ${user.name}`;
+    button.addEventListener('mousedown', (event) => {
+      event.preventDefault();
+      insertMention(elements.vcin, user);
+    });
+    elements.vpeople.appendChild(button);
+  });
 }
 
 export function focusComment() {
@@ -115,6 +140,7 @@ export const itemViewScreen = {
     elements.vdesc.className = 'empty';
     clearEditor(elements.vcin);
     renderComments(null);
+    elements.vpeople.innerHTML = '';
     setFooterMeta('metav', item.key);
 
     this.render();
@@ -149,6 +175,7 @@ export const itemViewScreen = {
     }
 
     renderComments(detail);
+    renderPeople(detail);
   },
 
   leave() {

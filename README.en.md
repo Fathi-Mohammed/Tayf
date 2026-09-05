@@ -38,12 +38,15 @@ description. The due date field understands `today`, `tomorrow`, weekday names,
 `C` jumps to the comment box; `Ctrl+Enter` posts it and it appears below straight away,
 without opening Jira.
 
-**The editor** — comments and descriptions both: `Ctrl+B` bold, `Ctrl+I` italic,
-`Ctrl+E` code; `- ` at the start of a line becomes a bullet, `1. ` a number, `# ` a
-heading, `> ` a quote. `@` opens the list of names and picking one inserts a real
-mention that notifies them — a space inside the name no longer breaks it. A description
-holding something the editor cannot carry (a table, an image, a panel) is locked rather
-than flattened on save.
+**The editor** — comments and descriptions both, with a row of buttons above it like
+Jira's: `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+U` underline, `Ctrl+Shift+S`
+strikethrough, `Ctrl+Shift+M` code, and `Ctrl+Shift+8` / `7` / `6` for bulleted,
+numbered and task lists — the same shortcuts Jira uses. Typing works too: `- `, `1. `,
+`[] `, `# `, `> ` and `````` turn into what they look like, and task list boxes tick
+by clicking them. `@` opens the list of names and picking one inserts a real mention
+that notifies them — a space inside the name no longer breaks it — with quick buttons
+for the people on the project underneath. A description holding something the editor
+cannot carry (a table, an image, a panel) is locked rather than flattened on save.
 
 **A meeting, quickly:** `Ctrl+M` from the list opens that same form already filled in —
 title `Meeting`, start and due date today, an hour of estimate, and the last board you

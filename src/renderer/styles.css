@@ -956,7 +956,21 @@
     color: var(--text); font-family: var(--sans); font-size: var(--fs-body);
     line-height: var(--lh-normal); outline: none;
   }
-  #vcin { margin-top: var(--sp-5); }
+  #vcin { min-height: 60px; }
+  #view .ewrap { margin-top: var(--sp-5); }
+
+  .etools {
+    display: flex; flex-wrap: wrap; gap: var(--sp-1); margin-bottom: var(--sp-2);
+    direction: ltr; justify-content: flex-end;
+  }
+  .etools button {
+    min-width: 26px; height: 24px; padding: 0 var(--sp-2);
+    background: none; border: 1px solid transparent; border-radius: var(--r-2);
+    color: var(--dim); font-family: var(--mono); font-size: var(--fs-subheadline);
+    cursor: pointer;
+  }
+  .etools button:hover { background: var(--hover); color: var(--text); }
+  .etools button:active { background: var(--accent-bg); color: var(--accent); }
   .editor:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
   .editor[contenteditable='false'] {
     color: var(--muted); background-color: var(--fill-3); border-color: var(--line);
@@ -987,11 +1001,23 @@
     background: var(--fill-3); white-space: pre-wrap;
   }
   .editor a, .vbody a { color: var(--accent); }
+  .editor ul.task, .vbody ul.task { padding-inline-start: var(--sp-2); list-style: none; }
+  .editor ul.task li, .vbody ul.task li { display: flex; gap: var(--sp-3); }
+  .tick { cursor: pointer; user-select: none; color: var(--muted); }
+  li[data-done='true'] { color: var(--dim); text-decoration: line-through; }
 
   .men {
     padding: 0 var(--sp-2); border-radius: var(--r-2); unicode-bidi: isolate;
     background: var(--accent-bg); color: var(--accent); white-space: nowrap;
   }
+
+  #vpeople { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+  #vpeople button {
+    padding: var(--sp-1) var(--sp-3); border-radius: var(--r-2);
+    background: var(--fill-3); border: 1px solid var(--fill-2); color: var(--muted);
+    font-family: var(--sans); font-size: var(--fs-subheadline); cursor: pointer;
+  }
+  #vpeople button:hover { background: var(--accent-bg); border-color: var(--accent-line); color: var(--accent); }
 
   #vchints {
     display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-3);

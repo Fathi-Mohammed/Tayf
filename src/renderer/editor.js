@@ -1,39 +1,71 @@
 const HEADING = /^H([1-3])$/;
-const MARK_TAGS = { B: 'bold', STRONG: 'bold', I: 'italic', EM: 'italic', CODE: 'code' };
+const MARK_TAGS = {
+  B: 'bold',
+  STRONG: 'bold',
+  I: 'italic',
+  EM: 'italic',
+  U: 'underline',
+  S: 'strike',
+  STRIKE: 'strike',
+  DEL: 'strike',
+  CODE: 'code'
+};
+const MARK_ORDER = ['code', 'strike', 'underline', 'italic', 'bold'];
+const MARK_ELEMENTS = { code: 'code', strike: 's', underline: 'u', italic: 'em', bold: 'strong' };
 const BLOCK_SELECTOR = 'p, h1, h2, h3, li, blockquote, pre';
-const NO_RULES = new Set(['LI', 'PRE']);
 const MAX_HEADING = 3;
+const TASK_DONE = 'true';
 
 const INPUT_RULES = [
-  { pattern: /^[-*]$/, run: (block) => intoList(block, false) },
-  { pattern: /^\d+\.$/, run: (block) => intoList(block, true) },
+  { pattern: /^[-*]$/, run: (block) => intoList(block, 'bullet') },
+  { pattern: /^\d+\.$/, run: (block) => intoList(block, 'ordered') },
+  { pattern: /^\[[ xX]?\]$/, run: (block) => intoList(block, 'task') },
   { pattern: /^(#{1,3})$/, run: (block, hit) => intoBlock(block, `h${hit[1].length}`) },
   { pattern: /^>$/, run: (block) => intoBlock(block, 'blockquote') },
   { pattern: /^```$/, run: (block) => intoBlock(block, 'pre') }
 ];
 
+const TOOLS = [
+  { id: 'bold', label: 'B', title: 'عريض · Ctrl+B' },
+  { id: 'italic', label: 'I', title: 'مايل · Ctrl+I' },
+  { id: 'underline', label: 'U', title: 'تحته خط · Ctrl+U' },
+  { id: 'strike', label: 'S', title: 'مشطوب · Ctrl+Shift+S' },
+  { id: 'code', label: '</>', title: 'كود · Ctrl+Shift+M' },
+  { id: 'bullet', label: '•', title: 'نقط · Ctrl+Shift+8' },
+  { id: 'ordered', label: '1.', title: 'ترقيم · Ctrl+Shift+7' },
+  { id: 'task', label: '☑', title: 'تشيك ليست · Ctrl+Shift+6' },
+  { id: 'quote', label: '❝', title: 'اقتباس' },
+  { id: 'mention', label: '@', title: 'منشن' }
+];
+
+const SHORTCUTS = {
+  'shift+KeyS': 'strike',
+  'shift+KeyM': 'code',
+  'shift+Digit8': 'bullet',
+  'shift+Digit7': 'ordered',
+  'shift+Digit6': 'task',
+  KeyE: 'code'
+};
+
 let separatorSet = false;
+
+function command(name, value) {
+  document.execCommand(name, false, value === undefined ? null : value);
+}
 
 function spanOf(rawText, marks) {
   const span = { text: rawText.replace(/\u00a0/g, ' ') };
-  if (marks.bold) span.bold = true;
-  if (marks.italic) span.italic = true;
-  if (marks.code) span.code = true;
+  MARK_ORDER.forEach((name) => {
+    if (marks[name]) span[name] = true;
+  });
   if (marks.link) span.link = marks.link;
   return span;
 }
 
 function sameMarks(one, two) {
-  return (
-    !one.mention &&
-    !two.mention &&
-    !one.br &&
-    !two.br &&
-    !!one.bold === !!two.bold &&
-    !!one.italic === !!two.italic &&
-    !!one.code === !!two.code &&
-    (one.link || '') === (two.link || '')
-  );
+  if (one.mention || two.mention || one.br || two.br) return false;
+  if ((one.link || '') !== (two.link || '')) return false;
+  return MARK_ORDER.every((name) => !!one[name] === !!two[name]);
 }
 
 function mergeSpans(spans) {
@@ -51,6 +83,7 @@ function inlineSpans(node, marks) {
   }
   if (node.nodeType !== Node.ELEMENT_NODE) return [];
   if (node.tagName === 'BR') return [{ br: true }];
+  if (node.classList.contains('tick')) return [];
   if (node.classList.contains('men')) {
     return [{ mention: { id: node.dataset.id || '', label: node.textContent } }];
   }
@@ -66,11 +99,25 @@ function spansOf(node) {
   return mergeSpans(inlineSpans(node, {}));
 }
 
+function listVariant(list) {
+  if (list.tagName === 'OL') return 'ordered';
+  return list.classList.contains('task') ? 'task' : 'bullet';
+}
+
 function readBlock(node) {
   const tag = node.tagName;
 
   if (tag === 'UL' || tag === 'OL') {
-    return { kind: 'list', ordered: tag === 'OL', items: [...node.children].map(spansOf) };
+    const variant = listVariant(node);
+    return {
+      kind: 'list',
+      variant,
+      items: [...node.children].map((item) => {
+        const entry = { spans: spansOf(item) };
+        if (variant === 'task') entry.done = item.dataset.done === TASK_DONE;
+        return entry;
+      })
+    };
   }
   if (tag === 'PRE') return { kind: 'code', text: node.textContent };
   if (tag === 'BLOCKQUOTE') return { kind: 'quote', spans: spansOf(node) };
@@ -83,7 +130,7 @@ function readBlock(node) {
 
 function hasContent(block) {
   if (block.kind === 'code') return !!block.text.trim();
-  if (block.kind === 'list') return block.items.some((spans) => spans.length);
+  if (block.kind === 'list') return block.items.some((item) => item.spans.length);
   return block.spans.some((span) => span.mention || (span.text || '').trim());
 }
 
@@ -113,6 +160,14 @@ export function mentionChip(id, label) {
   return chip;
 }
 
+function tickElement(done) {
+  const tick = document.createElement('span');
+  tick.className = 'tick';
+  tick.contentEditable = 'false';
+  tick.textContent = done ? '☑' : '☐';
+  return tick;
+}
+
 function wrap(tag, child) {
   const element = document.createElement(tag);
   element.appendChild(child);
@@ -124,9 +179,9 @@ function spanElement(span) {
   if (span.mention) return mentionChip(span.mention.id, span.mention.label);
 
   let node = document.createTextNode(span.text || '');
-  if (span.code) node = wrap('code', node);
-  if (span.italic) node = wrap('em', node);
-  if (span.bold) node = wrap('strong', node);
+  MARK_ORDER.forEach((name) => {
+    if (span[name]) node = wrap(MARK_ELEMENTS[name], node);
+  });
   if (span.link) {
     const link = wrap('a', node);
     link.setAttribute('href', span.link);
@@ -141,12 +196,21 @@ function fill(element, spans) {
   return element;
 }
 
+function itemElement(item, variant) {
+  const element = document.createElement('li');
+  if (variant === 'task') {
+    element.dataset.done = item.done ? TASK_DONE : 'false';
+    element.appendChild(tickElement(item.done));
+  }
+  return fill(element, item.spans);
+}
+
 function blockElement(block) {
   if (block.kind === 'list') {
-    const list = document.createElement(block.ordered ? 'ol' : 'ul');
-    (block.items || []).forEach((spans) => {
-      list.appendChild(fill(document.createElement('li'), spans));
-    });
+    const variant = block.variant || 'bullet';
+    const list = document.createElement(variant === 'ordered' ? 'ol' : 'ul');
+    if (variant === 'task') list.className = 'task';
+    (block.items || []).forEach((item) => list.appendChild(itemElement(item, variant)));
     return list;
   }
   if (block.kind === 'code') {
@@ -170,7 +234,7 @@ export function writeDoc(element, doc) {
 }
 
 export function isEmpty(element) {
-  return !element.textContent.trim() && !element.querySelector('.men');
+  return !element.textContent.replace(/[☐☑]/g, '').trim() && !element.querySelector('.men');
 }
 
 export function markEmpty(element) {
@@ -183,12 +247,18 @@ export function clearEditor(element) {
 
 function caretInto(node) {
   const caret = document.createRange();
-  caret.setStart(node, 0);
-  caret.collapse(true);
+  caret.selectNodeContents(node);
+  caret.collapse(false);
 
   const selection = document.getSelection();
   selection.removeAllRanges();
   selection.addRange(caret);
+}
+
+function keepCaret(target) {
+  const selection = document.getSelection();
+  if (selection && selection.anchorNode && target.contains(selection.anchorNode)) return;
+  caretInto(target);
 }
 
 export function focusEditor(element) {
@@ -204,23 +274,53 @@ export function focusEditor(element) {
 }
 
 function moveChildren(from, to) {
-  while (from.firstChild) to.appendChild(from.firstChild);
+  while (from.firstChild) {
+    const child = from.firstChild;
+    if (child.nodeType === Node.ELEMENT_NODE && child.classList.contains('tick')) child.remove();
+    else to.appendChild(child);
+  }
   if (!to.childNodes.length) to.appendChild(document.createElement('br'));
   return to;
 }
 
-function intoList(block, ordered) {
-  const list = document.createElement(ordered ? 'ol' : 'ul');
+function listItemFrom(block, variant) {
   const item = moveChildren(block, document.createElement('li'));
+  if (variant === 'task') {
+    item.dataset.done = 'false';
+    item.prepend(tickElement(false));
+  }
+  return item;
+}
+
+function intoList(block, variant) {
+  const list = document.createElement(variant === 'ordered' ? 'ol' : 'ul');
+  if (variant === 'task') list.className = 'task';
+
+  const item = listItemFrom(block, variant);
   list.appendChild(item);
   block.replaceWith(list);
-  caretInto(item);
+  keepCaret(item);
 }
 
 function intoBlock(block, tag) {
   const next = moveChildren(block, document.createElement(tag));
   block.replaceWith(next);
-  caretInto(next);
+  keepCaret(next);
+}
+
+function outOfList(list) {
+  const blocks = [...list.children].map((item) => moveChildren(item, document.createElement('p')));
+  list.replaceWith(...blocks);
+  keepCaret(blocks[blocks.length - 1]);
+}
+
+function convertList(list, variant) {
+  const next = document.createElement(variant === 'ordered' ? 'ol' : 'ul');
+  if (variant === 'task') next.className = 'task';
+
+  [...list.children].forEach((item) => next.appendChild(listItemFrom(item, variant)));
+  list.replaceWith(next);
+  keepCaret(next.lastElementChild || next);
 }
 
 function blockOf(element, node) {
@@ -230,12 +330,18 @@ function blockOf(element, node) {
   return block && element.contains(block) ? block : null;
 }
 
+function currentBlock(element) {
+  const selection = document.getSelection();
+  if (!selection || !selection.anchorNode) return null;
+  return blockOf(element, selection.anchorNode);
+}
+
 function applyInputRule(element) {
   const selection = document.getSelection();
   if (!selection || !selection.isCollapsed || !selection.anchorNode) return false;
 
   const block = blockOf(element, selection.anchorNode);
-  if (!block || NO_RULES.has(block.tagName)) return false;
+  if (!block || block.tagName === 'LI' || block.tagName === 'PRE') return false;
 
   const range = document.createRange();
   range.setStart(block, 0);
@@ -268,33 +374,115 @@ function toggleCode() {
   range.insertNode(code);
 }
 
-function onKeydown(event) {
-  if (event.key === ' ' && applyInputRule(event.currentTarget)) {
-    event.preventDefault();
+function listTool(element, variant) {
+  const block = currentBlock(element);
+  if (!block) return;
+
+  const item = block.tagName === 'LI' ? block : block.closest('li');
+  if (!item) {
+    intoList(block, variant);
     return;
   }
 
-  const modified = event.ctrlKey || event.metaKey;
-  if (modified && !event.shiftKey && String(event.key).toLowerCase() === 'e') {
+  const list = item.parentElement;
+  if (listVariant(list) === variant) outOfList(list);
+  else convertList(list, variant);
+}
+
+function quoteTool(element) {
+  const block = currentBlock(element);
+  if (!block || block.tagName === 'LI') return;
+  intoBlock(block, block.tagName === 'BLOCKQUOTE' ? 'p' : 'blockquote');
+}
+
+const TOOL_ACTIONS = {
+  bold: () => command('bold'),
+  italic: () => command('italic'),
+  underline: () => command('underline'),
+  strike: () => command('strikeThrough'),
+  code: () => toggleCode(),
+  bullet: (element) => listTool(element, 'bullet'),
+  ordered: (element) => listTool(element, 'ordered'),
+  task: (element) => listTool(element, 'task'),
+  quote: (element) => quoteTool(element),
+  mention: () => command('insertText', '@')
+};
+
+function runTool(element, id) {
+  const action = TOOL_ACTIONS[id];
+  if (!action) return;
+  action(element);
+  markEmpty(element);
+}
+
+function onKeydown(event) {
+  const element = event.currentTarget;
+
+  if (event.key === ' ' && applyInputRule(element)) {
     event.preventDefault();
-    toggleCode();
+    return;
   }
+  if (!(event.ctrlKey || event.metaKey)) return;
+
+  const tool = SHORTCUTS[`${event.shiftKey ? 'shift+' : ''}${event.code}`];
+  if (!tool) return;
+
+  event.preventDefault();
+  runTool(element, tool);
+}
+
+function onClick(event) {
+  const item = event.target.closest('li[data-done]');
+  if (!item || !event.target.classList.contains('tick')) return;
+
+  const done = item.dataset.done !== TASK_DONE;
+  item.dataset.done = done ? TASK_DONE : 'false';
+  event.target.textContent = done ? '☑' : '☐';
 }
 
 function onPaste(event) {
   event.preventDefault();
   const text = (event.clipboardData && event.clipboardData.getData('text/plain')) || '';
-  if (text) document.execCommand('insertText', false, text);
+  if (text) command('insertText', text);
+}
+
+function buildToolbar(element) {
+  const bar = document.createElement('div');
+  bar.className = 'etools';
+
+  TOOLS.forEach((tool) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.tool = tool.id;
+    button.title = tool.title;
+    button.textContent = tool.label;
+    bar.appendChild(button);
+  });
+
+  bar.addEventListener('mousedown', (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    event.preventDefault();
+    element.focus();
+    runTool(element, button.dataset.tool);
+  });
+
+  const holder = document.createElement('div');
+  holder.className = 'ewrap';
+  element.replaceWith(holder);
+  holder.append(bar, element);
 }
 
 export function installEditor(element) {
   if (!separatorSet) {
-    document.execCommand('defaultParagraphSeparator', false, 'p');
+    command('defaultParagraphSeparator', 'p');
     separatorSet = true;
   }
 
+  buildToolbar(element);
   element.addEventListener('keydown', onKeydown);
   element.addEventListener('paste', onPaste);
+  element.addEventListener('click', onClick);
   element.addEventListener('input', () => markEmpty(element));
   writeDoc(element, null);
 }
