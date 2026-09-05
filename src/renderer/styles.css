@@ -1006,6 +1006,11 @@
   .tick { cursor: pointer; user-select: none; color: var(--muted); }
   li[data-done='true'] { color: var(--dim); text-decoration: line-through; }
 
+  img.shot {
+    display: block; max-width: 100%; margin: var(--sp-3) 0;
+    border: 1px solid var(--line); border-radius: var(--r-3);
+  }
+
   .men {
     padding: 0 var(--sp-2); border-radius: var(--r-2); unicode-bidi: isolate;
     background: var(--accent-bg); color: var(--accent); white-space: nowrap;

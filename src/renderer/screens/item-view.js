@@ -2,7 +2,15 @@ import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
 import { escapeHtml, relativeTime } from '../format.js';
-import { installEditor, readDoc, writeDoc, clearEditor, isEmpty, focusEditor } from '../editor.js';
+import {
+  installEditor,
+  readDoc,
+  writeDoc,
+  clearEditor,
+  isEmpty,
+  focusEditor,
+  setImageTools
+} from '../editor.js';
 import {
   resetMentions,
   attachMentions,
@@ -16,7 +24,12 @@ export function currentDetail() {
   return context.detail;
 }
 
-function commentNode(comment) {
+function imagesOf(detail) {
+  const byName = new Map((detail.attachments || []).map((one) => [one.name, one.url]));
+  return (block) => byName.get(block.name) || '';
+}
+
+function commentNode(comment, resolve) {
   const when = comment.at ? relativeTime(Date.parse(comment.at)) : '';
   const box = document.createElement('div');
   box.className = 'vcom';
@@ -27,6 +40,7 @@ function commentNode(comment) {
   const body = document.createElement('div');
   body.className = 'vbody';
   body.dir = 'auto';
+  setImageTools(body, { resolve });
   if (comment.doc) writeDoc(body, comment.doc);
   else body.textContent = comment.text || '';
 
@@ -54,7 +68,8 @@ function renderComments(detail) {
     elements.vcomments.appendChild(line);
   }
 
-  comments.forEach((comment) => elements.vcomments.appendChild(commentNode(comment)));
+  const resolve = imagesOf(detail);
+  comments.forEach((comment) => elements.vcomments.appendChild(commentNode(comment, resolve)));
 }
 
 const PEOPLE_SHOWN = 4;
@@ -158,6 +173,15 @@ export const itemViewScreen = {
     const detail = response.item;
     context.detail = detail;
     resetMentions(detail.projectKey);
+    setImageTools(elements.vcin, {
+      resolve: imagesOf(detail),
+      upload: async (file) => {
+        setFlash('بيرفع الصورة…', 'pending');
+        const response = await window.tayf.attach({ key: detail.key, file });
+        setFlash('', '');
+        return response.error ? null : response.file;
+      }
+    });
     elements.vtitle.textContent = detail.title;
     elements.vmeta.innerHTML = metaEntries(item, detail)
       .map(

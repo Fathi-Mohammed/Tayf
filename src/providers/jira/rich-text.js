@@ -31,7 +31,10 @@ const KNOWN_NODES = new Set([
   'taskItem',
   'text',
   'hardBreak',
-  'mention'
+  'mention',
+  'mediaSingle',
+  'mediaGroup',
+  'media'
 ]);
 const SUPPORTED_MARKS = new Set(Object.values(MARK_NAMES).concat('link'));
 const MAX_HEADING = 3;
@@ -93,8 +96,20 @@ function listNode(block) {
   return node;
 }
 
+function imageNode(block) {
+  if (!block.url) return null;
+  const attrs = { type: 'external', url: block.url };
+  if (block.alt) attrs.alt = block.alt;
+  return {
+    type: 'mediaSingle',
+    attrs: { layout: 'center' },
+    content: [{ type: 'media', attrs }]
+  };
+}
+
 function blockToNode(block) {
   if (!block) return null;
+  if (block.kind === 'image') return imageNode(block);
   if (block.kind === 'list') return listNode(block);
 
   if (block.kind === 'code') {
@@ -124,6 +139,7 @@ function documentFromRich(doc) {
 function richTextOf(doc) {
   return ((doc && doc.blocks) || [])
     .map((block) => {
+      if (block.kind === 'image') return block.alt || '[image]';
       if (block.kind === 'code') return String(block.text || '');
       if (block.kind === 'list') {
         return (block.items || []).map((item) => spansToText(item.spans)).join('\n');
@@ -167,7 +183,19 @@ function itemFromNode(node) {
   return item;
 }
 
+function imageBlock(node) {
+  const media = (node.content || []).find((child) => child.type === 'media') || node;
+  const attrs = media.attrs || {};
+  const block = { kind: 'image', alt: attrs.alt || '' };
+  if (attrs.type === 'external') block.url = attrs.url || '';
+  else block.name = attrs.alt || '';
+  return block;
+}
+
 function nodeToBlock(node) {
+  if (node.type === 'mediaSingle' || node.type === 'mediaGroup' || node.type === 'media') {
+    return imageBlock(node);
+  }
   if (node.type === 'heading') {
     return {
       kind: 'heading',

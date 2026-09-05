@@ -4,6 +4,7 @@ const { JiraClient, JiraError } = require('./client');
 const issues = require('./issues');
 const boards = require('./boards');
 const metadata = require('./metadata');
+const attachments = require('./attachments');
 
 class JiraProvider {
   constructor(credentials) {
@@ -40,6 +41,14 @@ class JiraProvider {
 
   addComment(key, doc) {
     return issues.addComment(this.client, key, doc);
+  }
+
+  attachFile(key, file) {
+    return attachments.attachFile(this.client, key, file);
+  }
+
+  readImage(url) {
+    return attachments.readImage(this.client, url);
   }
 
   transitions(key) {

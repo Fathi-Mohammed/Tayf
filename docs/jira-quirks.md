@@ -96,6 +96,30 @@ from both — hence the `Set`.
 `description` is an Atlassian Document Format tree. `mappers.js` converts both ways
 so the neutral `WorkItem` carries plain text. **ADF must not leak past `providers/`.**
 
+### An image in a comment is not the attachment you just uploaded
+
+`POST /issue/{key}/attachments` gives you an attachment id (`73496`). The `media` node
+inside a comment wants a **Media Services UUID** (`b1ccce6b-…`), and no public REST
+endpoint hands that UUID out — not the upload response, not `GET /attachment/{id}`.
+Sending `{"type":"file","id":"<attachment id>"}` is rejected with
+`ATTACHMENT_VALIDATION_ERROR`.
+
+What Jira does accept is external media pointing back at the attachment:
+
+```json
+{ "type": "media", "attrs": { "type": "external",
+  "url": "https://<site>/rest/api/3/attachment/content/73496" } }
+```
+
+So `attachments.js` uploads the file and `rich-text.js` writes that node. Reading is the
+other direction: a `file` media node carries the filename in `alt`, so it is matched
+against the issue's attachment list to find a URL worth fetching.
+
+### A task list needs ids Jira will not generate for you
+
+`taskList` and every `taskItem` inside it need a `localId`. Without them the whole
+document is rejected. `rich-text.js` generates UUIDs for both.
+
 ### Rate limits
 
 Jira Cloud returns `429` with `Retry-After` under a cost-based system. The client

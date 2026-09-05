@@ -69,6 +69,39 @@ class JiraClient {
   put(pathname, payload) {
     return this.request(pathname, { method: 'PUT', body: JSON.stringify(payload) });
   }
+
+  postFile(pathname, { name, mime, bytes }) {
+    const boundary = `----tayf${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`;
+    const head = Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${name}"\r\n` +
+        `Content-Type: ${mime || 'application/octet-stream'}\r\n\r\n`
+    );
+    const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+
+    return this.request(pathname, {
+      method: 'POST',
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        'X-Atlassian-Token': 'no-check'
+      },
+      body: Buffer.concat([head, Buffer.from(bytes), tail])
+    });
+  }
+
+  async fetchBinary(url) {
+    let response;
+    try {
+      response = await fetch(url, { headers: { Authorization: this.authorization } });
+    } catch {
+      throw new JiraError('no-connection', 0);
+    }
+    if (!response.ok) throw new JiraError(codeForStatus(response.status), response.status, '');
+
+    return {
+      mime: response.headers.get('content-type') || 'application/octet-stream',
+      bytes: Buffer.from(await response.arrayBuffer())
+    };
+  }
 }
 
 module.exports = { JiraClient, JiraError };

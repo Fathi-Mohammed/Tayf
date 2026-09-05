@@ -35,6 +35,7 @@ const TOOLS = [
   { id: 'ordered', label: '1.', title: 'ترقيم · Ctrl+Shift+7' },
   { id: 'task', label: '☑', title: 'تشيك ليست · Ctrl+Shift+6' },
   { id: 'quote', label: '❝', title: 'اقتباس' },
+  { id: 'image', label: '🖼', title: 'صورة — أو الزقها على طول' },
   { id: 'mention', label: '@', title: 'منشن' }
 ];
 
@@ -47,7 +48,30 @@ const SHORTCUTS = {
   KeyE: 'code'
 };
 
+const imageTools = new WeakMap();
+const imageData = new Map();
+
 let separatorSet = false;
+
+export function setImageTools(element, tools) {
+  imageTools.set(element, tools || {});
+}
+
+function toolsFor(element) {
+  return imageTools.get(element) || {};
+}
+
+async function paintImage(image, url) {
+  if (imageData.has(url)) {
+    image.src = imageData.get(url);
+    return;
+  }
+
+  const response = await window.tayf.image(url);
+  if (!response || !response.data) return;
+  imageData.set(url, response.data);
+  image.src = response.data;
+}
 
 function command(name, value) {
   document.execCommand(name, false, value === undefined ? null : value);
@@ -119,6 +143,9 @@ function readBlock(node) {
       })
     };
   }
+  if (tag === 'IMG') {
+    return { kind: 'image', url: node.dataset.url || '', alt: node.getAttribute('alt') || '' };
+  }
   if (tag === 'PRE') return { kind: 'code', text: node.textContent };
   if (tag === 'BLOCKQUOTE') return { kind: 'quote', spans: spansOf(node) };
 
@@ -129,6 +156,7 @@ function readBlock(node) {
 }
 
 function hasContent(block) {
+  if (block.kind === 'image') return !!block.url;
   if (block.kind === 'code') return !!block.text.trim();
   if (block.kind === 'list') return block.items.some((item) => item.spans.length);
   return block.spans.some((span) => span.mention || (span.text || '').trim());
@@ -205,7 +233,22 @@ function itemElement(item, variant) {
   return fill(element, item.spans);
 }
 
-function blockElement(block) {
+function imageElement(block, resolve) {
+  const image = document.createElement('img');
+  image.className = 'shot';
+  image.alt = block.alt || '';
+  image.contentEditable = 'false';
+
+  const url = block.url || (resolve ? resolve(block) : '');
+  if (url) {
+    image.dataset.url = url;
+    paintImage(image, url);
+  }
+  return image;
+}
+
+function blockElement(block, resolve) {
+  if (block.kind === 'image') return imageElement(block, resolve);
   if (block.kind === 'list') {
     const variant = block.variant || 'bullet';
     const list = document.createElement(variant === 'ordered' ? 'ol' : 'ul');
@@ -228,7 +271,8 @@ function blockElement(block) {
 
 export function writeDoc(element, doc) {
   element.innerHTML = '';
-  ((doc && doc.blocks) || []).forEach((block) => element.appendChild(blockElement(block)));
+  const { resolve } = toolsFor(element);
+  ((doc && doc.blocks) || []).forEach((block) => element.appendChild(blockElement(block, resolve)));
   if (!element.childNodes.length) element.appendChild(fill(document.createElement('p'), []));
   markEmpty(element);
 }
@@ -405,6 +449,7 @@ const TOOL_ACTIONS = {
   ordered: (element) => listTool(element, 'ordered'),
   task: (element) => listTool(element, 'task'),
   quote: (element) => quoteTool(element),
+  image: (element) => pickImage(element),
   mention: () => command('insertText', '@')
 };
 
@@ -440,10 +485,85 @@ function onClick(event) {
   event.target.textContent = done ? '☑' : '☐';
 }
 
+function insertImage(element, source, url, alt) {
+  const image = document.createElement('img');
+  image.className = 'shot';
+  image.contentEditable = 'false';
+  image.alt = alt || '';
+  image.src = source;
+  if (url) image.dataset.url = url;
+
+  const selection = document.getSelection();
+  const block = currentBlock(element);
+  if (block) block.after(image);
+  else element.appendChild(image);
+
+  if (!image.nextElementSibling) {
+    element.appendChild(fill(document.createElement('p'), []));
+  }
+  if (selection) caretInto(image.nextElementSibling);
+  markEmpty(element);
+  return image;
+}
+
+function asDataUrl(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => resolve(String(reader.result || '')));
+    reader.addEventListener('error', () => resolve(''));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function takeImage(element, file) {
+  const { upload, onProblem } = toolsFor(element);
+  if (!upload) {
+    if (onProblem) onProblem();
+    return;
+  }
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const name = file.name || `لزقة-${Date.now()}.png`;
+  const shown = insertImage(element, await asDataUrl(file), '', name);
+
+  const stored = await upload({ name, mime: file.type || 'image/png', bytes });
+  if (!stored) {
+    shown.remove();
+    markEmpty(element);
+    return;
+  }
+
+  shown.dataset.url = stored.url;
+  imageData.set(stored.url, shown.src);
+}
+
+function pastedImage(event) {
+  const items = [...((event.clipboardData && event.clipboardData.files) || [])];
+  return items.find((file) => file.type.startsWith('image/')) || null;
+}
+
 function onPaste(event) {
+  const image = pastedImage(event);
+  if (image) {
+    event.preventDefault();
+    takeImage(event.currentTarget, image);
+    return;
+  }
+
   event.preventDefault();
   const text = (event.clipboardData && event.clipboardData.getData('text/plain')) || '';
   if (text) command('insertText', text);
+}
+
+function pickImage(element) {
+  const picker = document.createElement('input');
+  picker.type = 'file';
+  picker.accept = 'image/*';
+  picker.addEventListener('change', () => {
+    const file = picker.files && picker.files[0];
+    if (file) takeImage(element, file);
+  });
+  picker.click();
 }
 
 function buildToolbar(element) {

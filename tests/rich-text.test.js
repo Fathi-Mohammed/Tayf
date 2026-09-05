@@ -135,7 +135,42 @@ test('isSupported spots the shapes the editor cannot hold', () => {
     }),
     false
   );
-  assert.equal(isSupported({ type: 'doc', content: [{ type: 'mediaSingle', content: [] }] }), false);
+  assert.equal(isSupported({ type: 'doc', content: [{ type: 'mediaSingle', content: [] }] }), true);
+  assert.equal(isSupported({ type: 'doc', content: [{ type: 'panel', content: [] }] }), false);
+});
+
+test('an image travels as an external media node and reads back', () => {
+  const doc = {
+    blocks: [{ kind: 'image', url: 'https://x.test/rest/api/3/attachment/content/7', alt: 'shot.png' }]
+  };
+  const document = documentFromRich(doc);
+
+  assert.deepEqual(document.content[0], {
+    type: 'mediaSingle',
+    attrs: { layout: 'center' },
+    content: [
+      {
+        type: 'media',
+        attrs: { type: 'external', url: 'https://x.test/rest/api/3/attachment/content/7', alt: 'shot.png' }
+      }
+    ]
+  });
+  assert.deepEqual(richFromDocument(document).blocks, doc.blocks);
+});
+
+test('an image Jira holds by file id comes back named, for the attachment list to resolve', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'mediaSingle',
+        content: [{ type: 'media', attrs: { type: 'file', id: 'uuid-1', alt: 'shot.png' } }]
+      }
+    ]
+  };
+  assert.deepEqual(richFromDocument(document).blocks, [
+    { kind: 'image', alt: 'shot.png', name: 'shot.png' }
+  ]);
 });
 
 test('richTextOf flattens a rich document for anywhere plain text is wanted', () => {

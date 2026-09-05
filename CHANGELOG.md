@@ -26,6 +26,18 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
   of which an overlay has any use for. Cut, copy, paste and select-all keep their
   roles, which is where macOS gets those keys from.
 
+- **Images.** Paste a screenshot into the comment box, or pick one with the image
+  button: it is uploaded as an attachment on the task and placed in the comment, and it
+  renders inside the overlay — as do images other people left in theirs. The bytes are
+  fetched by the main process, which holds the credentials, and only from your own Jira
+  site, so a comment cannot point the app at someone else's host.
+
+  Getting there needed a detour. Jira's `media` node wants a Media Services UUID that
+  no public REST endpoint hands out, and referencing the attachment id it does hand out
+  is rejected outright. External media pointing back at the attachment's own content URL
+  is accepted, so that is what gets written — verified against a real issue rather than
+  guessed. Both findings are in `docs/jira-quirks.md`.
+
 - **The editor grew a toolbar and the rest of Jira's formatting.** Underline,
   strikethrough and task lists join bold, italic, code, lists, headings and quotes, on
   the same keys Jira uses — `Ctrl+U`, `Ctrl+Shift+S`, `Ctrl+Shift+M`, and

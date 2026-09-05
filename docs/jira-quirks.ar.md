@@ -91,6 +91,28 @@ create-meta بتاعها، ويطلّع حقول التخطيط اللي لسه 
 `description` عبارة عن شجرة Atlassian Document Format. `mappers.js` بيحوّل في
 الاتجاهين عشان الـ `WorkItem` المحايد يشيل نص عادي. **ADF ماينفعش يعدّي `providers/`.**
 
+### الصورة في الكومنت مش هي المرفق اللي رفعته
+
+`POST /issue/{key}/attachments` بيديك رقم مرفق (`73496`). لكن عنصر `media` جوه
+الكومنت عايز **UUID بتاع Media Services** (`b1ccce6b-…`)، ومفيش endpoint رسمي
+بيديك الـ UUID ده — لا رد الرفع ولا `GET /attachment/{id}`. ولو بعتّ
+`{"type":"file","id":"<رقم المرفق>"}` بيترفض بـ `ATTACHMENT_VALIDATION_ERROR`.
+
+اللي جيرا بيقبله هو صورة خارجية بتشاور على المرفق نفسه:
+
+```json
+{ "type": "media", "attrs": { "type": "external",
+  "url": "https://<site>/rest/api/3/attachment/content/73496" } }
+```
+
+فـ `attachments.js` بيرفع الملف و`rich-text.js` بيكتب العنصر ده. والقراءة بالعكس:
+عنصر `file` بيشيل اسم الملف في `alt`، فبندوّر بيه في لستة مرفقات التاسك على لينك نجيبه.
+
+### التشيك ليست محتاجة IDs جيرا مش هيولّدها لك
+
+`taskList` وكل `taskItem` جواها محتاجين `localId`. من غيرهم المستند كله بيترفض.
+`rich-text.js` بيولّد UUID للاتنين.
+
 ### حدود الاستخدام
 
 جيرا كلاود بيرجّع `429` مع `Retry-After` في نظام مبني على التكلفة. العميل بيطلّعها

@@ -104,7 +104,8 @@ const NOTIFICATION_TEXT = {
   transitionFailed: (status, reason) => `مانتقلش لـ ${status} — ${reason}`,
   updateFailed: (reason) => `ماتعدّلتش — ${reason}`,
   createFailed: (reason) => `التاسك ماتعملتش — ${reason}`,
-  commentFailed: (reason) => `الكومنت ماتبعتش — ${reason}`
+  commentFailed: (reason) => `الكومنت ماتبعتش — ${reason}`,
+  attachFailed: (reason) => `الصورة ماترفعتش — ${reason}`
 };
 
 function jiraComplaints(detail) {

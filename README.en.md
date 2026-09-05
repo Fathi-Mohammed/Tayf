@@ -38,6 +38,11 @@ description. The due date field understands `today`, `tomorrow`, weekday names,
 `C` jumps to the comment box; `Ctrl+Enter` posts it and it appears below straight away,
 without opening Jira.
 
+**Images:** paste one into the comment box (or use the image button) — it is uploaded
+as an attachment on the task and dropped into the comment, and it shows inside the
+overlay. Images other people put in their comments render there too. A task being
+created has no key yet, so its images wait until it exists.
+
 **The editor** — comments and descriptions both, with a row of buttons above it like
 Jira's: `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+U` underline, `Ctrl+Shift+S`
 strikethrough, `Ctrl+Shift+M` code, and `Ctrl+Shift+8` / `7` / `6` for bulleted,

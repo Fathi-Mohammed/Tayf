@@ -94,6 +94,26 @@ function register({ workspace, overlay, settings, actions }) {
     }
   });
 
+  ipcMain.handle('item:attach', async (_event, { key, file }) => {
+    if (!provider()) return notConfigured();
+    try {
+      return { file: await workspace.attachFile(key, file) };
+    } catch (error) {
+      const message = NOTIFICATION_TEXT.attachFailed(errorText(error));
+      workspace.recordFailure(key, message);
+      return { error: message };
+    }
+  });
+
+  ipcMain.handle('item:image', async (_event, url) => {
+    if (!provider()) return notConfigured();
+    try {
+      return { data: await workspace.readImage(url) };
+    } catch {
+      return { data: null };
+    }
+  });
+
   ipcMain.handle('item:create', async (_event, draft) => {
     if (!provider()) return notConfigured();
     try {

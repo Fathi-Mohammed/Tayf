@@ -65,7 +65,9 @@ module.exports = [
         requestAnimationFrame: 'readonly',
         Event: 'readonly',
         KeyboardEvent: 'readonly',
-        Node: 'readonly'
+        Node: 'readonly',
+        URL: 'readonly',
+        FileReader: 'readonly'
       }
     },
     rules: COMMON_RULES

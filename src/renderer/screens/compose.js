@@ -4,7 +4,7 @@ import { showLayout, setContext, paintBanners, setFlash, setVisible, setFooterMe
 import { escapeHtml } from '../format.js';
 import { parseDueDate, parseEstimate, toIsoDate, QUICK_DATES, DATE_WORDS } from '../dates.js';
 import { createCombo } from '../combo.js';
-import { installEditor, readDoc, writeDoc, clearEditor } from '../editor.js';
+import { installEditor, readDoc, writeDoc, clearEditor, setImageTools } from '../editor.js';
 import { resetMentions, attachMentions } from '../mention-picker.js';
 import {
   createGridRows,
@@ -364,6 +364,9 @@ async function enterCreate(prefillTitle, preset) {
   setRow(elements.ctype, elements.lbltype, true);
   clearEditor(elements.cdescin);
   elements.cdescin.contentEditable = 'true';
+  setImageTools(elements.cdescin, {
+    onProblem: () => setNote('اعمل التاسك الأول، وبعدين ضيف الصور من صفحتها', 'bad')
+  });
   elements.cdue.value = preset ? preset.due : '';
   elements.cest.value = preset ? preset.estimate : '';
   elements.search.placeholder = preset ? preset.placeholder : 'عنوان التاسك الجديدة';
@@ -440,6 +443,19 @@ async function enterEdit(item) {
 
   elements.cdue.value = detail.due || '';
   elements.cest.value = detail.estimate || '';
+
+  setImageTools(elements.cdescin, {
+    resolve: (block) => {
+      const found = (detail.attachments || []).find((one) => one.name === block.name);
+      return found ? found.url : '';
+    },
+    upload: async (file) => {
+      setNote('بيرفع الصورة…', '');
+      const response = await window.tayf.attach({ key: detail.key, file });
+      setNote(response.error || '', response.error ? 'bad' : '');
+      return response.error ? null : response.file;
+    }
+  });
 
   const held = detail.descriptionDoc || { blocks: [], supported: true };
   writeDoc(elements.cdescin, held.supported ? held : plainDoc(detail.description));

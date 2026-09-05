@@ -215,6 +215,11 @@ function toWorkItemDetail(issue) {
     descriptionDoc: richFromDocument(fields.description),
     labels: fields.labels || [],
     typeId: (fields.issuetype && fields.issuetype.id) || null,
+    attachments: (fields.attachment || []).map((one) => ({
+      name: one.filename,
+      url: one.content,
+      mime: one.mimeType
+    })),
     optionValues: customOptionValues(fields),
     dateValues: customDateValues(fields),
     ...toComments(fields.comment)

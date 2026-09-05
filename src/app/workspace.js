@@ -180,6 +180,14 @@ class Workspace extends EventEmitter {
     return comment;
   }
 
+  attachFile(key, file) {
+    return this.provider.attachFile(key, file);
+  }
+
+  readImage(url) {
+    return this.provider.readImage(url);
+  }
+
   async createItem(draft) {
     const key = await this.provider.createItem(draft);
     this.refresh();
