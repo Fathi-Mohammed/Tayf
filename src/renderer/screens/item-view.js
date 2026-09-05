@@ -2,7 +2,8 @@ import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
 import { escapeHtml, relativeTime } from '../format.js';
-import { resetMentions, pickedMentions } from '../mention-picker.js';
+import { installEditor, readDoc, writeDoc, clearEditor, isEmpty, focusEditor } from '../editor.js';
+import { resetMentions } from '../mention-picker.js';
 
 const context = { detail: null, requestId: 0, sending: false };
 
@@ -10,48 +11,61 @@ export function currentDetail() {
   return context.detail;
 }
 
-function commentHtml(comment) {
+function commentNode(comment) {
   const when = comment.at ? relativeTime(Date.parse(comment.at)) : '';
-  const line = [comment.author, when].filter(Boolean).join('  ·  ');
-  return `<div class="vcom"><b>${escapeHtml(line)}</b><span>${escapeHtml(comment.text)}</span></div>`;
+  const box = document.createElement('div');
+  box.className = 'vcom';
+
+  const head = document.createElement('b');
+  head.textContent = [comment.author, when].filter(Boolean).join('  ·  ');
+
+  const body = document.createElement('div');
+  body.className = 'vbody';
+  body.dir = 'auto';
+  if (comment.doc) writeDoc(body, comment.doc);
+  else body.textContent = comment.text || '';
+
+  box.append(head, body);
+  return box;
+}
+
+function captionOf(detail, shown) {
+  const older = (detail.commentTotal || shown) - shown;
+  if (!shown) return 'مفيش كومنتات لسه';
+  return older > 0 ? `فيه ${older} كومنت أقدم في جيرا` : '';
 }
 
 function renderComments(detail) {
-  if (!detail) {
-    elements.vcomments.innerHTML = '';
-    return;
-  }
+  elements.vcomments.innerHTML = '';
+  if (!detail) return;
 
   const comments = detail.comments || [];
-  const older = (detail.commentTotal || comments.length) - comments.length;
+  const caption = captionOf(detail, comments.length);
 
-  const caption = comments.length
-    ? older > 0
-      ? `فيه ${older} كومنت أقدم في جيرا`
-      : ''
-    : 'مفيش كومنتات لسه';
+  if (caption) {
+    const line = document.createElement('div');
+    line.className = 'vcold';
+    line.textContent = caption;
+    elements.vcomments.appendChild(line);
+  }
 
-  elements.vcomments.innerHTML =
-    (caption ? `<div class="vcold">${escapeHtml(caption)}</div>` : '') +
-    comments.map(commentHtml).join('');
+  comments.forEach((comment) => elements.vcomments.appendChild(commentNode(comment)));
 }
 
 export function focusComment() {
-  elements.vcin.focus();
+  focusEditor(elements.vcin);
 }
 
 export async function sendComment() {
   const { detail } = context;
-  const text = elements.vcin.value.trim();
-  if (!detail || !text || context.sending) return;
+  if (!detail || context.sending || isEmpty(elements.vcin)) return;
+
+  const doc = readDoc(elements.vcin);
+  if (!doc.blocks.length) return;
 
   context.sending = true;
   setFlash('بيبعت الكومنت…', 'pending');
-  const response = await window.tayf.comment({
-    key: detail.key,
-    text,
-    mentions: pickedMentions()
-  });
+  const response = await window.tayf.comment({ key: detail.key, doc });
   context.sending = false;
   if (context.detail !== detail) return;
 
@@ -60,7 +74,7 @@ export async function sendComment() {
     return;
   }
 
-  elements.vcin.value = '';
+  clearEditor(elements.vcin);
   resetMentions(detail.projectKey);
   detail.comments = [...(detail.comments || []), response.comment];
   detail.commentTotal = (detail.commentTotal || 0) + 1;
@@ -99,7 +113,7 @@ export const itemViewScreen = {
     elements.vmeta.innerHTML = '';
     elements.vdesc.textContent = 'بيحمّل…';
     elements.vdesc.className = 'empty';
-    elements.vcin.value = '';
+    clearEditor(elements.vcin);
     renderComments(null);
     setFooterMeta('metav', item.key);
 
@@ -141,7 +155,7 @@ export const itemViewScreen = {
     context.requestId += 1;
     context.detail = null;
     resetMentions(null);
-    elements.vcin.value = '';
+    clearEditor(elements.vcin);
     renderComments(null);
   },
 
@@ -151,3 +165,5 @@ export const itemViewScreen = {
     state.rows = [];
   }
 };
+
+installEditor(elements.vcin);

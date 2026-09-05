@@ -105,12 +105,12 @@ test('toWorkItemDetail flattens the description document to plain text', () => {
 test('toWorkItemDetail flattens comments to author, time and plain text', () => {
   const detail = toWorkItemDetail(RAW_ISSUE);
   assert.equal(detail.comments.length, 2);
-  assert.deepEqual(detail.comments[1], {
-    id: '2',
-    author: 'Sara',
-    at: '2026-09-02T09:00:00.000+0000',
-    text: 'looks good'
-  });
+  const comment = detail.comments[1];
+  assert.equal(comment.id, '2');
+  assert.equal(comment.author, 'Sara');
+  assert.equal(comment.at, '2026-09-02T09:00:00.000+0000');
+  assert.equal(comment.text, 'looks good');
+  assert.deepEqual(comment.doc.blocks, [{ kind: 'paragraph', spans: [{ text: 'looks good' }] }]);
 });
 
 test('toWorkItemDetail keeps the newest comments and drops the rest', () => {

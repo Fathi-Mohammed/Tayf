@@ -335,8 +335,15 @@
       <div id="vmeta"></div>
       <div id="vdesc"></div>
       <div id="vcomments"></div>
-      <textarea id="vcin" rows="2" spellcheck="false"
-        placeholder="اكتب كومنت — Ctrl+Enter يبعته"></textarea>
+      <div id="vcin" class="editor" contenteditable="true" spellcheck="false" dir="auto"
+        data-placeholder="اكتب كومنت — Ctrl+Enter يبعته"></div>
+      <div id="vchints">
+        <span><kbd>Ctrl B</kbd> عريض</span>
+        <span><kbd>-</kbd> نقط</span>
+        <span><kbd>1.</kbd> ترقيم</span>
+        <span><kbd>#</kbd> عنوان</span>
+        <span><kbd>@</kbd> منشن</span>
+      </div>
     </div>
 
     <div id="create">
@@ -403,6 +410,7 @@
       <span><kbd>E</kbd> تعديل</span>
       <span><kbd>S</kbd> غيّر الحالة</span>
       <span><kbd>C</kbd> كومنت</span>
+      <span><kbd>Ctrl Enter</kbd> ابعت</span>
       <span><kbd>Ctrl O</kbd> جيرا</span>
       <span><kbd>Esc</kbd> رجوع</span>
       <span id="metav"></span>

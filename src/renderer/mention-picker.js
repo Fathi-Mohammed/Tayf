@@ -1,5 +1,6 @@
 import elements from './elements.js';
 import { escapeHtml } from './format.js';
+import { mentionChip } from './editor.js';
 
 const TRIGGER = /(?:^|\s)@([^@\n]{0,40})$/;
 const MAX_ROWS = 6;
@@ -13,27 +14,22 @@ const picker = {
   projectKey: null,
   matches: [],
   highlighted: 0,
-  at: -1,
-  picked: []
+  spot: null
 };
 
 export function isOpen() {
   return picker.open;
 }
 
-export function pickedMentions() {
-  return picker.picked;
-}
-
 export function resetMentions(projectKey) {
   picker.projectKey = projectKey || null;
-  picker.picked = [];
   closePicker();
 }
 
 export function closePicker() {
   picker.open = false;
   picker.matches = [];
+  picker.spot = null;
   elements.mentions.innerHTML = '';
   elements.mentions.style.display = 'none';
 }
@@ -47,6 +43,25 @@ async function knownUsers() {
   const users = (response.users || []).filter((user) => user.name);
   usersByProject.set(projectKey, users);
   return users;
+}
+
+function caretSpot() {
+  const selection = document.getSelection();
+  if (!selection || !selection.isCollapsed) return null;
+
+  const node = selection.anchorNode;
+  if (!node || node.nodeType !== Node.TEXT_NODE || !elements.vcin.contains(node)) return null;
+
+  const before = node.nodeValue.slice(0, selection.anchorOffset);
+  const typed = TRIGGER.exec(before);
+  if (!typed) return null;
+
+  return {
+    node,
+    at: selection.anchorOffset - typed[1].length - 1,
+    end: selection.anchorOffset,
+    query: typed[1].toLowerCase()
+  };
 }
 
 function place() {
@@ -77,39 +92,44 @@ export function movePicker(delta) {
 
 export function choosePicker() {
   const user = picker.matches[picker.highlighted];
-  if (!user) {
+  const spot = picker.spot;
+  if (!user || !spot) {
     closePicker();
     return;
   }
 
-  const box = elements.vcin;
-  const label = `@${user.name}`;
-  const after = box.value.slice(box.selectionStart);
-  const caret = picker.at + label.length + 1;
+  const range = document.createRange();
+  range.setStart(spot.node, spot.at);
+  range.setEnd(spot.node, spot.end);
+  range.deleteContents();
 
-  box.value = `${box.value.slice(0, picker.at)}${label} ${after}`;
-  box.setSelectionRange(caret, caret);
+  const chip = mentionChip(user.accountId, `@${user.name}`);
+  range.insertNode(chip);
 
-  if (!picker.picked.some((one) => one.text === label)) {
-    picker.picked.push({ text: label, accountId: user.accountId });
-  }
+  const tail = document.createTextNode(' ');
+  chip.after(tail);
+
+  const caret = document.createRange();
+  caret.setStart(tail, 1);
+  caret.collapse(true);
+
+  const selection = document.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(caret);
 
   closePicker();
-  box.focus();
 }
 
 async function onInput() {
-  const box = elements.vcin;
-  const typed = box.value.slice(0, box.selectionStart).match(TRIGGER);
-  if (!typed) {
+  const spot = caretSpot();
+  if (!spot) {
     closePicker();
     return;
   }
 
-  const query = typed[1].toLowerCase();
   const users = await knownUsers();
   const matches = users
-    .filter((user) => user.name.toLowerCase().includes(query))
+    .filter((user) => user.name.toLowerCase().includes(spot.query))
     .slice(0, MAX_ROWS);
 
   if (!matches.length) {
@@ -117,7 +137,7 @@ async function onInput() {
     return;
   }
 
-  picker.at = box.selectionStart - typed[1].length - 1;
+  picker.spot = spot;
   picker.matches = matches;
   picker.highlighted = 0;
   picker.open = true;

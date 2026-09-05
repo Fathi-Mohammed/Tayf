@@ -113,7 +113,7 @@ function handleComment(event) {
 function handleItemView(event, key) {
   const detail = viewedDetail();
 
-  if (event.target === elements.vcin) return handleComment(event);
+  if (elements.vcin.contains(event.target)) return handleComment(event);
 
   if (event.key === 'Escape') {
     event.preventDefault();

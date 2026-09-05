@@ -174,8 +174,8 @@ class Workspace extends EventEmitter {
     this.refresh();
   }
 
-  async commentOnItem(key, text, mentions) {
-    const comment = await this.provider.addComment(key, text, mentions);
+  async commentOnItem(key, doc) {
+    const comment = await this.provider.addComment(key, doc);
     this.refresh();
     return comment;
   }

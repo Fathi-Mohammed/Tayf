@@ -64,7 +64,8 @@ module.exports = [
         clearInterval: 'readonly',
         requestAnimationFrame: 'readonly',
         Event: 'readonly',
-        KeyboardEvent: 'readonly'
+        KeyboardEvent: 'readonly',
+        Node: 'readonly'
       }
     },
     rules: COMMON_RULES

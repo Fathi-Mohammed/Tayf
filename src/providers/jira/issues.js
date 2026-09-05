@@ -8,6 +8,7 @@ const {
   toTransition,
   textToDocument
 } = require('./mappers');
+const { documentFromRich } = require('./rich-text');
 
 const ASSIGNED_AND_OPEN =
   'assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC';
@@ -70,8 +71,8 @@ async function updateItem(client, key, fields) {
   await client.put(`/rest/api/3/issue/${encodeURIComponent(key)}`, { fields: payload });
 }
 
-async function addComment(client, key, text, mentions) {
-  const body = textToDocument(text, mentions);
+async function addComment(client, key, doc) {
+  const body = documentFromRich(doc);
   const created = await client.post(`/rest/api/3/issue/${encodeURIComponent(key)}/comment`, {
     body
   });

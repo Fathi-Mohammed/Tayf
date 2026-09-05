@@ -13,6 +13,8 @@ const PLAIN_NODES = new Set(['doc', 'paragraph', 'text', 'hardBreak']);
 const NESTED_INDENT = '\n  ';
 const ISOLATE_START = '\u2068';
 const ISOLATE_END = '\u2069';
+const { richFromDocument } = require('./rich-text');
+
 const CUSTOM_FIELD = /^customfield_/;
 const RECENT_COMMENTS = 5;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -190,11 +192,13 @@ function customDateValues(fields) {
 }
 
 function toComment(comment) {
+  const body = comment && comment.body;
   return {
     id: (comment && comment.id) || null,
     author: (comment && comment.author && comment.author.displayName) || '',
     at: (comment && comment.created) || null,
-    text: documentToText(comment && comment.body).trim()
+    text: documentToText(body).trim(),
+    doc: richFromDocument(body)
   };
 }
 

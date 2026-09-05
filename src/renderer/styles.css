@@ -946,18 +946,53 @@
     display: block; margin-bottom: var(--sp-2); font-weight: 400;
     font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--dim);
   }
-  .vcom span {
-    display: block; font-size: var(--fs-callout); line-height: var(--lh-relaxed);
-    color: var(--text-3); white-space: pre-wrap;
+  .vcom .vbody {
+    font-size: var(--fs-callout); line-height: var(--lh-relaxed); color: var(--text-3);
   }
   #vcin {
-    width: 100%; margin-top: var(--sp-5); padding: var(--sp-4); resize: none;
+    position: relative; width: 100%; margin-top: var(--sp-5); padding: var(--sp-4);
+    min-height: 46px; max-height: 200px; overflow-y: auto;
     background-color: var(--fill); border: 1px solid transparent; border-radius: var(--r-3);
     color: var(--text); font-family: var(--sans); font-size: var(--fs-body);
     line-height: var(--lh-normal); outline: none;
   }
   #vcin:focus { border-color: var(--accent-line); background-color: var(--accent-soft); }
-  #vcin::placeholder { color: var(--dim); }
+  #vcin.blank::before {
+    content: attr(data-placeholder); position: absolute; pointer-events: none;
+    top: var(--sp-4); inset-inline-start: var(--sp-4); color: var(--dim);
+  }
+
+  #vcin p, #vcin h1, #vcin h2, #vcin h3, #vcin ul, #vcin ol, #vcin blockquote, #vcin pre,
+  .vbody p, .vbody h1, .vbody h2, .vbody h3, .vbody ul, .vbody ol, .vbody blockquote, .vbody pre {
+    margin: 0 0 var(--sp-3);
+  }
+  #vcin > *:last-child, .vbody > *:last-child { margin-bottom: 0; }
+  #vcin h1, .vbody h1 { font-size: var(--fs-title3); }
+  #vcin h2, .vbody h2, #vcin h3, .vbody h3 { font-size: var(--fs-body); }
+  #vcin ul, .vbody ul, #vcin ol, .vbody ol { padding-inline-start: var(--sp-6); }
+  #vcin li, .vbody li { margin-bottom: var(--sp-1); }
+  #vcin blockquote, .vbody blockquote {
+    padding-inline-start: var(--sp-4); border-inline-start: 2px solid var(--line); color: var(--muted);
+  }
+  #vcin pre, .vbody pre, #vcin code, .vbody code {
+    font-family: var(--mono); font-size: var(--fs-subheadline);
+  }
+  #vcin pre, .vbody pre {
+    padding: var(--sp-3) var(--sp-4); border-radius: var(--r-2);
+    background: var(--fill-3); white-space: pre-wrap;
+  }
+  #vcin a, .vbody a { color: var(--accent); }
+
+  .men {
+    padding: 0 var(--sp-2); border-radius: var(--r-2); unicode-bidi: isolate;
+    background: var(--accent-bg); color: var(--accent); white-space: nowrap;
+  }
+
+  #vchints {
+    display: flex; flex-wrap: wrap; gap: var(--sp-4); margin-top: var(--sp-3);
+    font-family: var(--mono); font-size: var(--fs-footnote); color: var(--dim);
+  }
+  #vchints kbd { margin-inline-end: var(--sp-2); }
 
   #mentions {
     display: none; position: fixed; z-index: 25;

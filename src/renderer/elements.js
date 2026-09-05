@@ -9,7 +9,7 @@ const IDS = [
   'sappearance', 'stheme', 'sfont', 'sscale',
   'snudge', 'snudgeevery', 'snudgeidle', 'snudgestart', 'snudgeend', 'snudgedays',
   'snudgecheck', 'snudgecheckevery', 'snudgeoverdue', 'snudgeoverduedays', 'snudgestatuses',
-  'view', 'vtitle', 'vmeta', 'vdesc', 'vcomments', 'vcin',
+  'view', 'vtitle', 'vmeta', 'vdesc', 'vcomments', 'vcin', 'vchints',
   'create', 'lblboard', 'cboardwrap', 'cboard', 'cboardlist',
   'lbltype', 'ctype', 'lblassignee', 'cassigneewrap', 'cassignee', 'cassigneelist',
   'lbldue', 'duewrap', 'cdue', 'chips', 'lblest', 'cest',
