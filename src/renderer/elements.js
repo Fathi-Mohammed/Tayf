@@ -9,7 +9,7 @@ const IDS = [
   'sappearance', 'stheme', 'sfont', 'sscale',
   'snudge', 'snudgeevery', 'snudgeidle', 'snudgestart', 'snudgeend', 'snudgedays',
   'snudgecheck', 'snudgecheckevery', 'snudgeoverdue', 'snudgeoverduedays', 'snudgestatuses',
-  'view', 'vtitle', 'vmeta', 'vdesc',
+  'view', 'vtitle', 'vmeta', 'vdesc', 'vcomments', 'vcin', 'vpeople',
   'create', 'lblboard', 'cboardwrap', 'cboard', 'cboardlist',
   'lbltype', 'ctype', 'lblassignee', 'cassigneewrap', 'cassignee', 'cassigneelist',
   'lbldue', 'duewrap', 'cdue', 'chips', 'lblest', 'cest',
@@ -17,7 +17,7 @@ const IDS = [
   'finish', 'ftask', 'lblfres', 'fres', 'lblftime', 'ftime', 'fest', 'fnote',
   'foot', 'meta', 'foots', 'metas', 'footv', 'metav',
   'footd', 'metad', 'footc', 'metac', 'footf', 'metaf',
-  'actions'
+  'actions', 'mentions'
 ];
 
 const elements = Object.fromEntries(IDS.map((id) => [id, document.getElementById(id)]));

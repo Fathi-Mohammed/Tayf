@@ -17,7 +17,17 @@ import { FILTERS, setFilter, backToTaskList } from './screens/task-list.js';
 import { transitionContext, chooseTransition } from './screens/transitions.js';
 import { submit as submitTransitionForm, copyEstimateIntoWorklog } from './screens/transition-form.js';
 import { submit as submitCompose, currentDetail as composeDetail, isEditing } from './screens/compose.js';
-import { currentDetail as viewedDetail } from './screens/item-view.js';
+import {
+  currentDetail as viewedDetail,
+  focusComment,
+  sendComment
+} from './screens/item-view.js';
+import {
+  isOpen as mentionIsOpen,
+  movePicker as moveMention,
+  choosePicker as chooseMention,
+  closePicker as closeMentions
+} from './mention-picker.js';
 import {
   save as saveSettings,
   showTabByNumber,
@@ -74,8 +84,36 @@ function handleSettings(event, key) {
   return true;
 }
 
+function handleMention(event) {
+  if (event.key === 'ArrowDown') moveMention(1);
+  else if (event.key === 'ArrowUp') moveMention(-1);
+  else if (event.key === 'Enter' || event.key === 'Tab') chooseMention();
+  else if (event.key === 'Escape') closeMentions();
+  else return true;
+
+  event.preventDefault();
+  return true;
+}
+
+function handleComment(event) {
+  if (mentionIsOpen()) return handleMention(event);
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    elements.vcin.blur();
+    return true;
+  }
+  if (event.key === 'Enter' && hasCommandModifier(event)) {
+    event.preventDefault();
+    sendComment();
+  }
+  return true;
+}
+
 function handleItemView(event, key) {
   const detail = viewedDetail();
+
+  if (elements.vcin.contains(event.target)) return handleComment(event);
 
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -90,6 +128,11 @@ function handleItemView(event, key) {
   if (key === 's' && detail) {
     event.preventDefault();
     goTo('transitions', { item: detail });
+    return true;
+  }
+  if (key === 'c' && detail) {
+    event.preventDefault();
+    focusComment();
     return true;
   }
   if (hasCommandModifier(event) && key === 'o') {
@@ -126,13 +169,15 @@ function handleTransitionForm(event, key) {
 }
 
 function handleCompose(event, key) {
+  if (mentionIsOpen()) return handleMention(event);
+
   if (event.key === 'Escape') {
     event.preventDefault();
     backToTaskList();
     return true;
   }
   if (event.key === 'Enter') {
-    if (event.target === elements.cdescin && !hasCommandModifier(event)) return true;
+    if (elements.cdescin.contains(event.target) && !hasCommandModifier(event)) return true;
     event.preventDefault();
     submitCompose();
     return true;

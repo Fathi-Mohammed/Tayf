@@ -34,6 +34,25 @@ type. If you want to be specific: board · type · assignee · due date · estim
 description. The due date field understands `today`, `tomorrow`, weekday names,
 `+3`, and plain dates; a bare number in the estimate field means minutes.
 
+**On the task page** (`Enter` on any task): the description and the five newest comments.
+`C` jumps to the comment box; `Ctrl+Enter` posts it and it appears below straight away,
+without opening Jira.
+
+**Images:** paste one into the comment box (or use the image button) — it is uploaded
+as an attachment on the task and dropped into the comment, and it shows inside the
+overlay. Images other people put in their comments render there too. A task being
+created has no key yet, so its images wait until it exists.
+
+**The editor** — comments and descriptions both, with a row of buttons above it like
+Jira's: `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+U` underline, `Ctrl+Shift+S`
+strikethrough, `Ctrl+Shift+M` code, and `Ctrl+Shift+8` / `7` / `6` for bulleted,
+numbered and task lists — the same shortcuts Jira uses. Typing works too: `- `, `1. `,
+`[] `, `# `, `> ` and `````` turn into what they look like, and task list boxes tick
+by clicking them. `@` opens the list of names and picking one inserts a real mention
+that notifies them — a space inside the name no longer breaks it — with quick buttons
+for the people on the project underneath. A description holding something the editor
+cannot carry (a table, an image, a panel) is locked rather than flattened on save.
+
 **A meeting, quickly:** `Ctrl+M` from the list opens that same form already filled in —
 title `Meeting`, start and due date today, an hour of estimate, and the last board you
 sent a task to. They are ordinary fields, so change whatever you like; they are only

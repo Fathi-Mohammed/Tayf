@@ -3,14 +3,25 @@
 const BLOCK_SEPARATORS = {
   paragraph: '\n\n',
   heading: '\n\n',
-  blockquote: '\n\n',
   codeBlock: '\n\n',
-  bulletList: '\n\n',
-  orderedList: '\n\n',
+  mediaSingle: '\n\n',
+  mediaGroup: '\n\n',
+  panel: '\n\n',
+  table: '\n\n',
+  tableHeader: '  ·  ',
+  tableCell: '  ·  ',
   listItem: '\n'
 };
+const MEDIA_NODES = new Set(['media', 'mediaInline']);
+const NESTED_INDENT = '\n  ';
+const ISOLATE_START = '\u2068';
+const ISOLATE_END = '\u2069';
+const { richFromDocument } = require('./rich-text');
+
 const CUSTOM_FIELD = /^customfield_/;
+const RECENT_COMMENTS = 5;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const CELL_TAIL = /\s*·\s*$/;
 
 function toWorkItem(issue) {
   const fields = issue.fields || {};
@@ -38,11 +49,64 @@ function toWorkItem(issue) {
   };
 }
 
+function linkedText(node) {
+  const text = node.text || '';
+  const link = (node.marks || []).find((mark) => mark.type === 'link');
+  const href = (link && link.attrs && link.attrs.href) || '';
+  if (!href || !text || text.includes(href) || href.includes(text)) return text;
+  return `${text} (${href})`;
+}
+
+function mentionText(node) {
+  const attrs = node.attrs || {};
+  const name = String(attrs.text || attrs.displayName || '').trim() || 'user';
+  const handle = name.startsWith('@') ? name : `@${name}`;
+  return `${ISOLATE_START}${handle}${ISOLATE_END}`;
+}
+
+function mediaText(node) {
+  const name = String((node.attrs && node.attrs.alt) || '').trim();
+  return name ? `[${name}]` : '[image]';
+}
+
+function listText(items, marker) {
+  const lines = (items || []).map(
+    (item, index) => marker(item, index) + documentToText(item).trim().replace(/\n/g, NESTED_INDENT)
+  );
+  return `${lines.join('\n')}\n\n`;
+}
+
+function quoteText(node) {
+  const inner = (node.content || []).map(documentToText).join('').trim();
+  if (!inner) return '';
+  const quoted = inner
+    .split('\n')
+    .map((line) => `> ${line}`)
+    .join('\n');
+  return `${quoted}\n\n`;
+}
+
 function documentToText(node) {
   if (!node) return '';
   if (typeof node === 'string') return node;
-  if (node.type === 'text') return node.text || '';
+  if (node.type === 'text') return linkedText(node);
   if (node.type === 'hardBreak') return '\n';
+  if (node.type === 'mention') return mentionText(node);
+  if (node.type === 'emoji') {
+    return String((node.attrs && (node.attrs.text || node.attrs.shortName)) || '');
+  }
+  if (MEDIA_NODES.has(node.type)) return mediaText(node);
+  if (node.type === 'tableRow') {
+    return `${(node.content || []).map(documentToText).join('').replace(CELL_TAIL, '')}\n`;
+  }
+  if (node.type === 'blockquote') return quoteText(node);
+  if (node.type === 'bulletList') return listText(node.content, () => '• ');
+  if (node.type === 'orderedList') return listText(node.content, (item, index) => `${index + 1}. `);
+  if (node.type === 'taskList') {
+    return listText(node.content, (item) =>
+      item && item.attrs && item.attrs.state === 'DONE' ? '[x] ' : '[ ] '
+    );
+  }
 
   const text = (node.content || []).map(documentToText).join('');
   const separator = BLOCK_SEPARATORS[node.type];
@@ -50,17 +114,51 @@ function documentToText(node) {
   return text.replace(/\n+$/, '') + separator;
 }
 
-function textToDocument(text) {
+function inlineNodes(line, mentions) {
+  if (!line) return [];
+  if (!mentions.length) return [{ type: 'text', text: line }];
+
+  const nodes = [];
+  let buffer = '';
+  let index = 0;
+
+  while (index < line.length) {
+    const hit = mentions.find((mention) => line.startsWith(mention.text, index));
+    if (!hit) {
+      buffer += line[index];
+      index += 1;
+      continue;
+    }
+    if (buffer) {
+      nodes.push({ type: 'text', text: buffer });
+      buffer = '';
+    }
+    nodes.push({ type: 'mention', attrs: { id: hit.accountId, text: hit.text } });
+    index += hit.text.length;
+  }
+
+  if (buffer) nodes.push({ type: 'text', text: buffer });
+  return nodes;
+}
+
+function namedMentions(mentions) {
+  return (mentions || [])
+    .filter((mention) => mention && mention.accountId && mention.text)
+    .sort((one, two) => two.text.length - one.text.length);
+}
+
+function textToDocument(text, mentions) {
   const normalised = String(text == null ? '' : text).replace(/\r/g, '');
   if (!normalised.trim()) return null;
 
+  const named = namedMentions(mentions);
   const content = normalised
     .split(/\n{2,}/)
     .map((paragraph) => {
       const nodes = [];
       paragraph.split('\n').forEach((line, index) => {
         if (index) nodes.push({ type: 'hardBreak' });
-        if (line) nodes.push({ type: 'text', text: line });
+        nodes.push(...inlineNodes(line, named));
       });
       return nodes;
     })
@@ -93,15 +191,38 @@ function customDateValues(fields) {
   return values;
 }
 
+function toComment(comment) {
+  const body = comment && comment.body;
+  return {
+    id: (comment && comment.id) || null,
+    author: (comment && comment.author && comment.author.displayName) || '',
+    at: (comment && comment.created) || null,
+    text: documentToText(body).trim(),
+    doc: richFromDocument(body)
+  };
+}
+
+function toComments(field) {
+  const comments = ((field && field.comments) || []).slice(-RECENT_COMMENTS).map(toComment);
+  return { comments, commentTotal: Number(field && field.total) || comments.length };
+}
+
 function toWorkItemDetail(issue) {
   const fields = issue.fields || {};
   return {
     ...toWorkItem(issue),
     description: documentToText(fields.description).trim(),
+    descriptionDoc: richFromDocument(fields.description),
     labels: fields.labels || [],
     typeId: (fields.issuetype && fields.issuetype.id) || null,
+    attachments: (fields.attachment || []).map((one) => ({
+      name: one.filename,
+      url: one.content,
+      mime: one.mimeType
+    })),
     optionValues: customOptionValues(fields),
-    dateValues: customDateValues(fields)
+    dateValues: customDateValues(fields),
+    ...toComments(fields.comment)
   };
 }
 
@@ -127,8 +248,10 @@ function toTransition(transition) {
 }
 
 module.exports = {
+  RECENT_COMMENTS,
   toWorkItem,
   toWorkItemDetail,
+  toComment,
   toTransition,
   documentToText,
   textToDocument

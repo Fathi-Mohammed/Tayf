@@ -64,7 +64,10 @@ module.exports = [
         clearInterval: 'readonly',
         requestAnimationFrame: 'readonly',
         Event: 'readonly',
-        KeyboardEvent: 'readonly'
+        KeyboardEvent: 'readonly',
+        Node: 'readonly',
+        URL: 'readonly',
+        FileReader: 'readonly'
       }
     },
     rules: COMMON_RULES

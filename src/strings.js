@@ -103,7 +103,9 @@ const NOTIFICATION_TEXT = {
   actionFailedTitle: (key) => (key ? `${key} ماتنفذش` : 'الأكشن ماتنفذش'),
   transitionFailed: (status, reason) => `مانتقلش لـ ${status} — ${reason}`,
   updateFailed: (reason) => `ماتعدّلتش — ${reason}`,
-  createFailed: (reason) => `التاسك ماتعملتش — ${reason}`
+  createFailed: (reason) => `التاسك ماتعملتش — ${reason}`,
+  commentFailed: (reason) => `الكومنت ماتبعتش — ${reason}`,
+  attachFailed: (reason) => `الصورة ماترفعتش — ${reason}`
 };
 
 function jiraComplaints(detail) {

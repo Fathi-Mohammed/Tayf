@@ -1,8 +1,34 @@
 'use strict';
 
-const { ipcMain, shell } = require('electron');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { ipcMain, shell, dialog } = require('electron');
 const credentials = require('../storage/credentials');
 const { errorText, NOTIFICATION_TEXT, ERROR_TEXT } = require('../strings');
+
+const IMAGE_TYPES = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.bmp': 'image/bmp',
+  '.svg': 'image/svg+xml'
+};
+
+async function readPicked(chosen) {
+  if (chosen.canceled || !chosen.filePaths.length) return { file: null };
+
+  const filePath = chosen.filePaths[0];
+  const bytes = await fs.readFile(filePath);
+  return {
+    file: {
+      name: path.basename(filePath),
+      mime: IMAGE_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+      bytes
+    }
+  };
+}
 
 function notConfigured() {
   return { error: ERROR_TEXT['not-configured'] };
@@ -80,6 +106,53 @@ function register({ workspace, overlay, settings, actions }) {
       const message = NOTIFICATION_TEXT.updateFailed(errorText(error));
       workspace.recordFailure(key, message);
       return { error: message };
+    }
+  });
+
+  ipcMain.handle('item:comment', async (_event, { key, doc }) => {
+    if (!provider()) return notConfigured();
+    try {
+      return { comment: await workspace.commentOnItem(key, doc) };
+    } catch (error) {
+      const message = NOTIFICATION_TEXT.commentFailed(errorText(error));
+      workspace.recordFailure(key, message);
+      return { error: message };
+    }
+  });
+
+  ipcMain.handle('image:pick', async () => {
+    overlay.hold();
+    try {
+      return await readPicked(
+        await dialog.showOpenDialog(overlay.window, {
+          properties: ['openFile'],
+          filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'] }]
+        })
+      );
+    } catch {
+      return { file: null };
+    } finally {
+      overlay.release();
+    }
+  });
+
+  ipcMain.handle('item:attach', async (_event, { key, file }) => {
+    if (!provider()) return notConfigured();
+    try {
+      return { file: await workspace.attachFile(key, file) };
+    } catch (error) {
+      const message = NOTIFICATION_TEXT.attachFailed(errorText(error));
+      workspace.recordFailure(key, message);
+      return { error: message };
+    }
+  });
+
+  ipcMain.handle('item:image', async (_event, url) => {
+    if (!provider()) return notConfigured();
+    try {
+      return { data: await workspace.readImage(url) };
+    } catch {
+      return { data: null };
     }
   });
 

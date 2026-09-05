@@ -7,6 +7,13 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ### Added
 
+- **Comments, read and written from the overlay.** The task page now shows the five
+  newest comments under the description — author, how long ago, and the text — and
+  `C` jumps to a box at the bottom where `Ctrl+Enter` posts one. The new comment
+  appears in place, so nothing about a quick reply needs a browser tab. They are
+  fetched from the comment endpoint newest-first rather than read off the issue, which
+  is what keeps a task with forty comments from showing its five oldest.
+
 - **A meeting, in one keystroke — `Ctrl+M`.** It opens the ordinary create form with
   every field already answered: the title reads `Meeting`, the start date and the due
   date are today, an hour goes into the estimate, and the board is the last one a task
@@ -19,7 +26,56 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
   of which an overlay has any use for. Cut, copy, paste and select-all keep their
   roles, which is where macOS gets those keys from.
 
+- **Images.** Paste a screenshot into the comment box, or pick one with the image
+  button: it is uploaded as an attachment on the task and placed in the comment, and it
+  renders inside the overlay — as do images other people left in theirs. The bytes are
+  fetched by the main process, which holds the credentials, and only from your own Jira
+  site, so a comment cannot point the app at someone else's host.
+
+  Getting there needed a detour. Jira's `media` node wants a Media Services UUID that
+  no public REST endpoint hands out, and referencing the attachment id it does hand out
+  is rejected outright. External media pointing back at the attachment's own content URL
+  is accepted, so that is what gets written — verified against a real issue rather than
+  guessed. Both findings are in `docs/jira-quirks.md`.
+
+- **The editor grew a toolbar and the rest of Jira's formatting.** Underline,
+  strikethrough and task lists join bold, italic, code, lists, headings and quotes, on
+  the same keys Jira uses — `Ctrl+U`, `Ctrl+Shift+S`, `Ctrl+Shift+M`, and
+  `Ctrl+Shift+8` / `7` / `6`. A row of buttons sits above both editors for the same
+  ten commands, `[] ` starts a task list and its boxes tick by clicking, and the task
+  list carries the `localId` that Jira rejects the document without. Under the comment
+  box there is a row of one-click names, the way Jira offers the people on the issue.
+
+- **A real editor, not a text box.** Comments and descriptions are written in a small
+  rich text editor: bold, italic, inline code, bullet and numbered lists, headings and
+  quotes, with `- `, `1. `, `# ` and `> ` turning into them as you type. Mentions are
+  chips, so a space in a name cannot break one and half of it cannot be deleted.
+
+  It writes a neutral document — paragraphs, headings, lists, quotes, code, and spans
+  carrying bold, italic, code, link or mention — which the Jira layer maps to ADF and
+  back. The renderer never learns what ADF is, and reading uses the same pair of
+  functions as writing, so a comment written in Jira arrives with its formatting.
+
+  Descriptions go through the same editor, which is what finally makes editing one
+  safe: the bullets and headings that used to be flattened on save now survive it. A
+  description holding a table, an image or a panel is still locked, because those are
+  shapes this editor cannot carry.
+
 ### Fixed
+
+- The overlay used to vanish the moment the file dialog opened, and never came back —
+  it hides on losing focus, and a native dialog takes focus. It now holds itself open
+  while a dialog of its own is up, and the picker is Electron's rather than a hidden
+  file input.
+
+- Inline code did nothing unless text was selected first. Pressing it with the caret
+  sitting in a line now opens a code run and typing continues inside it, and pressing
+  it again steps back out — the way bold has always worked.
+
+- The toolbar reads as one: drawn icons for code, the three lists, quote, image and
+  mention, with the four letters styled as what they do, and separators between the
+  groups. The row of typing hints under the box is gone; the icons carry the same
+  shortcuts in their tooltips.
 
 - Leaving the create form and coming back to it lost the custom date and option rows.
   They are cleared on the way out but were only redrawn when the board or the type

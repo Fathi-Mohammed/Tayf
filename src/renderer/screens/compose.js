@@ -4,6 +4,8 @@ import { showLayout, setContext, paintBanners, setFlash, setVisible, setFooterMe
 import { escapeHtml } from '../format.js';
 import { parseDueDate, parseEstimate, toIsoDate, QUICK_DATES, DATE_WORDS } from '../dates.js';
 import { createCombo } from '../combo.js';
+import { installEditor, readDoc, writeDoc, clearEditor, setImageTools } from '../editor.js';
+import { resetMentions, attachMentions } from '../mention-picker.js';
 import {
   createGridRows,
   renderOptionRows,
@@ -21,6 +23,17 @@ const PRESETS = {
     estimate: '1h'
   }
 };
+
+const RICH_DESCRIPTION =
+  'الوصف فيه حاجات المحرر ده مايعرفش يمسكها (جدول · صورة · لوحة ملوّنة) — قفلناه عشان الحفظ مايمسحهاش. عدّله في جيرا بـ Ctrl+O';
+
+function plainDoc(text) {
+  return {
+    blocks: String(text || '')
+      .split('\n')
+      .map((line) => ({ kind: 'paragraph', spans: line ? [{ text: line }] : [] }))
+  };
+}
 
 const context = {
   intent: 'create',
@@ -105,6 +118,7 @@ async function onBoardChange() {
     return;
   }
 
+  resetMentions(context.projectKey);
   await loadIssueTypes(requestId);
   if (requestId !== context.requestId) return;
   showRequirements();
@@ -223,7 +237,7 @@ async function submitCreate() {
     summary,
     due: due.value,
     estimate: estimate.value,
-    description: elements.cdescin.value,
+    description: readDoc(elements.cdescin),
     dateFields: dates.fields,
     optionFields: collectOptionRows(optionEntries)
   });
@@ -288,8 +302,10 @@ async function submitEdit() {
     if ((dates.fields[fieldId] || null) !== before) fields[fieldId] = dates.fields[fieldId];
   });
 
-  if (elements.cdescin.value.trim() !== String(detail.description || '').trim()) {
-    fields.description = elements.cdescin.value;
+  const written = readDoc(elements.cdescin);
+  const held = (detail.descriptionDoc && detail.descriptionDoc.blocks) || [];
+  if (JSON.stringify(written.blocks) !== JSON.stringify(held)) {
+    fields.description = written;
   }
 
   const options = collectOptionRows(optionEntries);
@@ -346,7 +362,11 @@ async function enterCreate(prefillTitle, preset) {
   setVisible(elements.cdesc, false);
   setRow(elements.cboardwrap, elements.lblboard, true);
   setRow(elements.ctype, elements.lbltype, true);
-  elements.cdescin.value = '';
+  clearEditor(elements.cdescin);
+  elements.cdescin.contentEditable = 'true';
+  setImageTools(elements.cdescin, {
+    onProblem: () => setNote('اعمل التاسك الأول، وبعدين ضيف الصور من صفحتها', 'bad')
+  });
   elements.cdue.value = preset ? preset.due : '';
   elements.cest.value = preset ? preset.estimate : '';
   elements.search.placeholder = preset ? preset.placeholder : 'عنوان التاسك الجديدة';
@@ -423,9 +443,26 @@ async function enterEdit(item) {
 
   elements.cdue.value = detail.due || '';
   elements.cest.value = detail.estimate || '';
-  elements.cdescin.value = detail.description || '';
 
-  setNote('', '');
+  setImageTools(elements.cdescin, {
+    resolve: (block) => {
+      const found = (detail.attachments || []).find((one) => one.name === block.name);
+      return found ? found.url : '';
+    },
+    upload: async (file) => {
+      setNote('بيرفع الصورة…', '');
+      const response = await window.tayf.attach({ key: detail.key, file });
+      setNote(response.error || '', response.error ? 'bad' : '');
+      return response.error ? null : response.file;
+    }
+  });
+
+  const held = detail.descriptionDoc || { blocks: [], supported: true };
+  writeDoc(elements.cdescin, held.supported ? held : plainDoc(detail.description));
+  elements.cdescin.contentEditable = held.supported ? 'true' : 'false';
+  resetMentions(detail.projectKey);
+
+  setNote(held.supported ? '' : RICH_DESCRIPTION, '');
   elements.search.focus();
   elements.search.select();
 }
@@ -443,7 +480,7 @@ export const composeScreen = {
     if (dateRows) dateRows.clear();
     optionEntries = [];
     dateEntries = [];
-    elements.cdescin.value = '';
+    clearEditor(elements.cdescin);
     context.detail = null;
   },
 
@@ -453,6 +490,9 @@ export const composeScreen = {
     state.rows = [];
   }
 };
+
+installEditor(elements.cdescin);
+attachMentions(elements.cdescin);
 
 elements.ctype.addEventListener('change', () => loadCreateFields());
 

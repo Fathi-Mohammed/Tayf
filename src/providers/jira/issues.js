@@ -1,6 +1,14 @@
 'use strict';
 
-const { toWorkItem, toWorkItemDetail, toTransition, textToDocument } = require('./mappers');
+const {
+  RECENT_COMMENTS,
+  toWorkItem,
+  toWorkItemDetail,
+  toComment,
+  toTransition,
+  textToDocument
+} = require('./mappers');
+const { documentFromRich } = require('./rich-text');
 
 const ASSIGNED_AND_OPEN =
   'assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC';
@@ -38,17 +46,39 @@ async function fetchAssignedItems(client) {
   }
 }
 
+async function fetchComments(client, key) {
+  const page = await client.get(
+    `/rest/api/3/issue/${encodeURIComponent(key)}/comment` +
+      `?orderBy=-created&maxResults=${RECENT_COMMENTS}`
+  );
+  const comments = (page.comments || []).map(toComment).reverse();
+  return { comments, commentTotal: Number(page.total) || comments.length };
+}
+
 async function fetchItem(client, key) {
-  const issue = await client.get(`/rest/api/3/issue/${encodeURIComponent(key)}`);
-  return toWorkItemDetail(issue);
+  const [issue, recent] = await Promise.all([
+    client.get(`/rest/api/3/issue/${encodeURIComponent(key)}`),
+    fetchComments(client, key).catch(() => null)
+  ]);
+  return { ...toWorkItemDetail(issue), ...(recent || {}) };
 }
 
 async function updateItem(client, key, fields) {
   const payload = { ...fields };
-  if (typeof payload.description === 'string') {
+  if (payload.description && payload.description.blocks) {
+    payload.description = documentFromRich(payload.description);
+  } else if (typeof payload.description === 'string') {
     payload.description = textToDocument(payload.description);
   }
   await client.put(`/rest/api/3/issue/${encodeURIComponent(key)}`, { fields: payload });
+}
+
+async function addComment(client, key, doc) {
+  const body = documentFromRich(doc);
+  const created = await client.post(`/rest/api/3/issue/${encodeURIComponent(key)}/comment`, {
+    body
+  });
+  return toComment(created);
 }
 
 async function fetchTransitions(client, key) {
@@ -91,7 +121,10 @@ async function createItem(client, draft) {
 
   if (draft.assigneeId) fields.assignee = { accountId: draft.assigneeId };
 
-  const description = textToDocument(draft.description);
+  const description =
+    draft.description && draft.description.blocks
+      ? documentFromRich(draft.description)
+      : textToDocument(draft.description);
   if (description) fields.description = description;
   if (draft.due) fields.duedate = draft.due;
   if (draft.estimate) fields.timetracking = { originalEstimate: draft.estimate };
@@ -111,6 +144,7 @@ module.exports = {
   fetchAssignedItems,
   fetchItem,
   updateItem,
+  addComment,
   fetchTransitions,
   applyTransition,
   logWork,

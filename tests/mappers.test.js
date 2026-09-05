@@ -39,6 +39,22 @@ const RAW_ISSUE = {
         { type: 'paragraph', content: [{ type: 'text', text: 'first line' }] },
         { type: 'paragraph', content: [{ type: 'text', text: 'second line' }] }
       ]
+    },
+    comment: {
+      comments: [
+        {
+          id: '1',
+          author: { displayName: 'Fathy' },
+          created: '2026-09-01T12:00:00.000+0000',
+          body: paragraph('on it')
+        },
+        {
+          id: '2',
+          author: { displayName: 'Sara' },
+          created: '2026-09-02T09:00:00.000+0000',
+          body: paragraph('looks good')
+        }
+      ]
     }
   }
 };
@@ -83,6 +99,37 @@ test('toWorkItemDetail separates custom option fields from custom date fields', 
 
 test('toWorkItemDetail flattens the description document to plain text', () => {
   assert.equal(toWorkItemDetail(RAW_ISSUE).description, 'first line\n\nsecond line');
+});
+
+test('toWorkItemDetail flattens comments to author, time and plain text', () => {
+  const detail = toWorkItemDetail(RAW_ISSUE);
+  assert.equal(detail.comments.length, 2);
+  const comment = detail.comments[1];
+  assert.equal(comment.id, '2');
+  assert.equal(comment.author, 'Sara');
+  assert.equal(comment.at, '2026-09-02T09:00:00.000+0000');
+  assert.equal(comment.text, 'looks good');
+  assert.deepEqual(comment.doc.blocks, [{ kind: 'paragraph', spans: [{ text: 'looks good' }] }]);
+});
+
+test('toWorkItemDetail keeps the newest comments and drops the rest', () => {
+  const comments = Array.from({ length: 7 }, (_, index) => ({
+    id: String(index),
+    author: { displayName: 'Fathy' },
+    created: '2026-09-02T09:00:00.000+0000',
+    body: paragraph(`comment ${index}`)
+  }));
+
+  const fields = { comment: { comments, total: comments.length } };
+  const detail = toWorkItemDetail({ key: 'X-1', fields });
+  assert.equal(detail.comments.length, 5);
+  assert.equal(detail.comments[0].text, 'comment 2');
+  assert.equal(detail.comments[4].text, 'comment 6');
+  assert.equal(detail.commentTotal, 7);
+});
+
+test('toWorkItemDetail reports no comments when the issue has none', () => {
+  assert.deepEqual(toWorkItemDetail({ key: 'X-1', fields: {} }).comments, []);
 });
 
 test('toTransition exposes the resolutions Jira offers, and nothing invented', () => {
@@ -156,5 +203,84 @@ test('documentToText keeps headings and list items readable', () => {
       paragraph('after')
     ]
   };
-  assert.equal(documentToText(document).trim(), 'Steps\n\none\ntwo\n\nafter');
+  assert.equal(documentToText(document).trim(), 'Steps\n\n• one\n• two\n\nafter');
+});
+
+test('documentToText spells out a mention instead of dropping it', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'thanks ' },
+          { type: 'mention', attrs: { id: 'acc-9', text: '@Sara Ali' } }
+        ]
+      }
+    ]
+  };
+  assert.equal(documentToText(document).trim(), 'thanks \u2068@Sara Ali\u2069');
+});
+
+test('documentToText keeps the link behind the words, and marks an image', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text: 'the spec',
+            marks: [{ type: 'link', attrs: { href: 'https://x.test/s' } }]
+          }
+        ]
+      },
+      { type: 'mediaSingle', content: [{ type: 'media', attrs: { id: 'm1', type: 'file' } }] }
+    ]
+  };
+  assert.equal(documentToText(document).trim(), 'the spec (https://x.test/s)\n\n[image]');
+});
+
+test('documentToText shows which task list items are ticked', () => {
+  const document = {
+    type: 'doc',
+    content: [
+      {
+        type: 'taskList',
+        content: [
+          {
+            type: 'taskItem',
+            attrs: { state: 'DONE' },
+            content: [{ type: 'text', text: 'shipped' }]
+          },
+          {
+            type: 'taskItem',
+            attrs: { state: 'TODO' },
+            content: [{ type: 'text', text: 'pending' }]
+          }
+        ]
+      }
+    ]
+  };
+  assert.equal(documentToText(document).trim(), '[x] shipped\n[ ] pending');
+});
+
+test('textToDocument turns picked names into real mentions, longest first', () => {
+  const document = textToDocument('thanks @Sara Ali and @Sara', [
+    { text: '@Sara', accountId: 'acc-3' },
+    { text: '@Sara Ali', accountId: 'acc-9' }
+  ]);
+
+  assert.deepEqual(document.content[0].content, [
+    { type: 'text', text: 'thanks ' },
+    { type: 'mention', attrs: { id: 'acc-9', text: '@Sara Ali' } },
+    { type: 'text', text: ' and ' },
+    { type: 'mention', attrs: { id: 'acc-3', text: '@Sara' } }
+  ]);
+});
+
+test('textToDocument ignores a mention that is missing an account', () => {
+  const document = textToDocument('hi @Ghost', [{ text: '@Ghost' }]);
+  assert.deepEqual(document.content[0].content, [{ type: 'text', text: 'hi @Ghost' }]);
 });
