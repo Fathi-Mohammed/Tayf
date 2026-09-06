@@ -5,7 +5,16 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-06
+
 ### Added
+
+- **English, as a second interface language.** Settings → عام → Language switches the
+  whole overlay, and the choice is remembered. The interface flips to LTR with it: the
+  task options menu opens on the right, the arrow hint follows the direction, and dates
+  and numbers take the English locale. Arabic stays the default and stays the source —
+  the English copy is keyed by the Arabic string, so a screen with no translation shows
+  Arabic rather than a blank. Thanks to @AhmedHHamdy.
 
 - **A leaderboard of who logged what — `Ctrl+R`.** The three highest sit on a podium,
   first in the middle with a crown, and the rest follow in a ranked list with your own
