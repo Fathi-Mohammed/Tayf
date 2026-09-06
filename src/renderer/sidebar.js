@@ -3,6 +3,7 @@ import elements from './elements.js';
 import { state, isInHand } from './state.js';
 import { setVisible } from './chrome.js';
 import { toIsoDate } from './dates.js';
+import { todayProgress } from './progress.js';
 import {
   escapeHtml,
   durationSeconds,
@@ -17,12 +18,6 @@ import {
 
 const RING_RADIUS = 20;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
-
-function todayProgress() {
-  const today = toIsoDate(new Date());
-  const due = state.workspace.items.filter((item) => item.due && item.due <= today);
-  return { done: due.filter((item) => item.category === 'done').length, total: due.length };
-}
 
 function remainingText(left, total) {
   if (!total) return t("مفيش حاجة معادها النهاردة");
@@ -73,10 +68,13 @@ function clockHtml(item) {
   );
 }
 
-function activeHtml(item) {
+function barWidth(item) {
   const estimate = durationSeconds(item.estimate);
-  const spent = spentSeconds(item) + workingSince(item);
-  const width = estimate ? Math.min(100, Math.round((spent / estimate) * 100)) : 0;
+  if (!estimate) return 0;
+  return Math.min(100, Math.round(((spentSeconds(item) + workingSince(item)) / estimate) * 100));
+}
+
+function activeHtml(item) {
   const over = overtimeSeconds(item);
 
   return (
@@ -85,7 +83,7 @@ function activeHtml(item) {
     t("<span class=\"astate\">شغل جاري</span>") +
     `<span class="akey">${escapeHtml(item.key)}</span></div>` +
     `<div class="atitle">${escapeHtml(item.title || UNTITLED)}</div>` +
-    `<div class="abar${over ? ' late' : ''}"><span style="width:${width}%"></span></div>` +
+    `<div class="abar${over ? ' late' : ''}"><span></span></div>` +
     clockHtml(item)
   );
 }
@@ -98,12 +96,22 @@ export function paintSidebar() {
 
   setVisible(elements.side, true, 'flex');
 
-  const { done, total } = todayProgress();
+  const { done, total } = todayProgress(
+    state.workspace.items,
+    state.workspace.closedToday,
+    toIsoDate(new Date())
+  );
   elements.ringwrap.innerHTML = ringHtml(done, total);
   elements.tsub.textContent = remainingText(Math.max(0, total - done), total);
 
   const item = workingItem();
   setVisible(elements.active, !!item);
-  if (item) elements.active.innerHTML = activeHtml(item);
+  if (item) {
+    elements.active.innerHTML = activeHtml(item);
+    // CSP الطبقة (style-src 'self') بيحظر أي style جوه الماركب، فالبار كان
+    // بيفضل فاضي العرض ويملا الكارت. بيتحط من هنا بعد الرسم.
+    const fill = elements.active.querySelector('.abar span');
+    if (fill) fill.style.width = `${barWidth(item)}%`;
+  }
   return item;
 }

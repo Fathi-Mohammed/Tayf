@@ -12,6 +12,7 @@ import {
   installBoardPicker
 } from './board-picker.js';
 import { setFlash } from './chrome.js';
+import { refreshTasks } from './refresh.js';
 import { QUICK_DATES } from './dates.js';
 import { FILTERS, setFilter, backToTaskList } from './screens/task-list.js';
 import { transitionContext, chooseTransition } from './screens/transitions.js';
@@ -395,6 +396,14 @@ export function installKeyboard() {
     }
 
     const screen = activeScreenName();
+
+    if (event.key === 'F5') {
+      event.preventDefault();
+      if (screen === 'leaderboard') refreshRank();
+      else refreshTasks();
+      return;
+    }
+
     const handler = SCREEN_HANDLERS[screen];
     if (handler) {
       handler(event, key);
@@ -450,6 +459,8 @@ export function installKeyboard() {
     const chip = event.target.closest('.fil');
     if (chip) setFilter(chip.dataset.f);
   });
+
+  elements.reload.addEventListener('click', refreshTasks);
 
   elements.views.addEventListener('click', (event) => {
     const button = event.target.closest('.vbtn');

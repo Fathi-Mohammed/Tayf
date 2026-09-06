@@ -25,7 +25,8 @@ On macOS these are `⌥ Space` and `⌥ ⇧ Space`, because `Ctrl+Space` is take
 keyboard layout switcher.
 
 **In the list:** `↑` `↓` move · **`→` item actions** (view · edit · change status ·
-open in Jira · copy key) · `Tab` change status · `Enter` view · `Esc` close.
+open in Jira · copy key) · `Tab` change status · `Enter` view · `F5` refresh ·
+`Esc` close.
 Filters across the top — all · today · overdue · in progress — on `Alt+1` to `Alt+4`.
 Search matches the key, title, type, and board name.
 
@@ -61,13 +62,14 @@ defaults, so that the hour a meeting took gets recorded with a single `Enter`.
 ## Appearance
 
 Settings → **المظهر** (`Ctrl+4`): pin light or dark, or leave it following the system ·
-five themes carried over from VS Code (Tokyo Night, One Dark Pro, Dracula, Nord,
-GitHub), each with a light and a dark face · a choice of three fonts · and the overlay
+six themes — five carried over from VS Code (Tokyo Night, One Dark Pro, Dracula, Nord,
+GitHub) and Glassify, whose surfaces are translucent and frost whatever sits behind
+them — each with a light and a dark face · a choice of three fonts · and the overlay
 scales from 90% to 130% if you find it small.
 
 Every size comes from one token layer built on the macOS type ramp in Apple's
 [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/typography).
-A theme changes colour only, so the rhythm holds whichever one you pick.
+A theme changes colour and surface only, so the rhythm holds whichever one you pick.
 
 ## The interesting problem: one project, several boards
 

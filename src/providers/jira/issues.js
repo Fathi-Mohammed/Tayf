@@ -13,6 +13,15 @@ const { documentFromRich } = require('./rich-text');
 const ASSIGNED_AND_OPEN =
   'assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC';
 
+// الاستعلام اللي فوق بيستبعد المقفول، فحلقة "تقدم النهاردة" مكانش عندها بسط
+// تعدّه أصلاً. بنسأل عن اللي اتقفل النهاردة وكان معاده النهاردة أو فات.
+// statusCategoryChangedDate مش resolved: في ووركفلوهات بتنقل لـ Done من غير
+// resolution، وساعتها resolved بيفضل فاضي والتاسك متتحسبش.
+const CLOSED_TODAY =
+  'assignee = currentUser() AND statusCategory = Done ' +
+  'AND statusCategoryChangedDate >= startOfDay() AND duedate <= endOfDay() ' +
+  'ORDER BY statusCategoryChangedDate DESC';
+
 const LIST_FIELDS = [
   'summary',
   'status',
@@ -29,9 +38,9 @@ const LIST_FIELDS = [
 
 const ENDPOINT_GONE = new Set([404, 410]);
 
-async function fetchAssignedItems(client) {
+async function searchWorkItems(client, jql) {
   const query = new URLSearchParams({
-    jql: ASSIGNED_AND_OPEN,
+    jql,
     fields: LIST_FIELDS,
     maxResults: '50'
   }).toString();
@@ -44,6 +53,14 @@ async function fetchAssignedItems(client) {
     const page = await client.get(`/rest/api/3/search?${query}`);
     return (page.issues || []).map(toWorkItem);
   }
+}
+
+function fetchAssignedItems(client) {
+  return searchWorkItems(client, ASSIGNED_AND_OPEN);
+}
+
+function fetchClosedToday(client) {
+  return searchWorkItems(client, CLOSED_TODAY);
 }
 
 const OLDER_COMMENTS = 10;
@@ -148,6 +165,7 @@ async function createItem(client, draft) {
 module.exports = {
   ASSIGNED_AND_OPEN,
   fetchAssignedItems,
+  fetchClosedToday,
   fetchItem,
   fetchOlderComments,
   updateItem,

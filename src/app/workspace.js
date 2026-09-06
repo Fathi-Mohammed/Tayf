@@ -19,17 +19,22 @@ class Workspace extends EventEmitter {
     this.cache = cache;
     this.log = log;
     this.provider = null;
-    this.refreshing = false;
+    this.running = null;
+    this.queued = null;
     this.boardSync = { signature: '', at: 0, running: false };
 
     const stored = cache.read();
     this.state = {
       configured: false,
+      refreshing: false,
       error: null,
       failure: null,
       items: stored.items,
       fetchedAt: stored.fetchedAt,
       user: null,
+      // مش متخزّنة في الكاش عن قصد: دي مربوطة بيوم، وكاش امبارح كان هيعدّ
+      // تاسكات قديمة على إنها خلصت النهاردة. أول ريفريش بيملاها.
+      closedToday: [],
       boardsByItemKey: stored.boardsByItemKey,
       transitionsNeedingWorklog: stored.transitionsNeedingWorklog
     };
@@ -76,21 +81,53 @@ class Workspace extends EventEmitter {
     this.publish();
   }
 
-  async refresh() {
-    if (this.refreshing) return;
+  // الطلب اللي بييجي والريفريش شغّال مبيتكنسلش — بيستنى اللي قبله وبيجري بعده.
+  // ده مهم لأن كل كتابة (نقل تاسك، تاسك جديدة، كومنت) بتطلب ريفريش وراها،
+  // ولو وقعت فوق بولينج الدقيقة كانت القايمة تفضل قديمة لحد التيك اللي بعده.
+  // بيرجّع وعد بينتهي لما القراية تخلص فعلاً، عشان اللي طلبها يعرف يوقّف السبينر.
+  refresh() {
+    if (this.running) {
+      this.queued = this.queued || this.running.then(() => this.refresh());
+      return this.queued;
+    }
+
+    this.running = this.runRefresh().finally(() => {
+      this.running = null;
+      this.queued = null;
+    });
+    return this.running;
+  }
+
+  async runRefresh() {
     if (!this.provider) {
       this.state.configured = false;
+      this.state.refreshing = false;
       this.state.error = null;
       this.publish();
       return;
     }
 
-    this.refreshing = true;
+    // النشر هنا للحالة الباردة بس — الطبقة محتاجة تعرف إنها بتجيب عشان
+    // متقولش "مفيش تاسكات" وهي لسه بتسأل. لو في كاش معروض، النشر ده كان
+    // هيعيد رسم القايمة مرتين كل بولينج من غير أي داعي.
+    this.state.refreshing = true;
+    if (!this.state.items.length) this.publish();
     try {
       if (!this.state.user) {
         this.state.user = await this.provider.currentUser();
       }
-      this.state.items = await this.provider.assignedItems();
+      const [items, closedToday] = await Promise.all([
+        this.provider.assignedItems(),
+        // قراية تكميلية لحلقة التقدم — لو جيرا رفضتها منوقعش الريفريش كله
+        // عشانها، بنسيب آخر قيمة عرفناها ونكمّل.
+        this.provider.closedToday().catch((error) => {
+          this.log.appendLine(`closed today: ${error.message}`);
+          return this.state.closedToday;
+        })
+      ]);
+
+      this.state.items = items;
+      this.state.closedToday = closedToday;
       this.state.fetchedAt = Date.now();
       this.state.error = null;
       this.attachBoards();
@@ -99,7 +136,7 @@ class Workspace extends EventEmitter {
     } catch (error) {
       this.state.error = error;
     } finally {
-      this.refreshing = false;
+      this.state.refreshing = false;
       this.publish();
     }
   }

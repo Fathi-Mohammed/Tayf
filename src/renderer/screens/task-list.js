@@ -6,6 +6,7 @@ import { showLayout, setContext, paintBanners, setFooterMeta, itemCountMeta } fr
 import { paintRows, itemRowHtml } from '../list-view.js';
 import { paintSidebar } from '../sidebar.js';
 import { syncTicker } from '../board.js';
+import { isRefreshing } from '../refresh.js';
 import { currentBoardName } from '../board-picker.js';
 import { toIsoDate } from '../dates.js';
 
@@ -79,6 +80,7 @@ export function setFilter(name) {
 
 function paintBoardBar() {
   elements.brdname.textContent = currentBoardName();
+  elements.reload.classList.toggle('busy', isRefreshing());
   Array.from(elements.views.children).forEach((button) => {
     button.classList.toggle('on', button.dataset.v === state.view);
   });
@@ -127,7 +129,14 @@ export const taskListScreen = {
       at += group.items.length;
     });
 
-    const empty = elements.search.value ? t("مفيش نتايج.") : t("مفيش تاسكات مسندة ليك.");
+    // أول قراية لسه شغالة ومفيش كاش — "مفيش تاسكات مسندة ليك" هنا كذبة،
+    // لسه محدش سأل جيرا أصلاً.
+    const loading = state.workspace.refreshing && !state.workspace.items.length;
+    const empty = loading
+      ? t("بيجيب التاسكات…")
+      : elements.search.value
+        ? t("مفيش نتايج.")
+        : t("مفيش تاسكات مسندة ليك.");
     paintRows(rows, empty, (item, index, selected) => itemRowHtml(item, selected, index), headers);
     clampSelection();
     setFooterMeta('meta', itemCountMeta());
