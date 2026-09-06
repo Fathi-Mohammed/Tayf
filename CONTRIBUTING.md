@@ -107,16 +107,12 @@ and uploads to a **draft** GitHub Release. Draft, so that installed copies never
 update feed that is missing half its files. Write the notes from `CHANGELOG.md`, then
 publish the release.
 
-What lands on it:
-
-| File | What it is |
-| --- | --- |
-| `Tayf-Setup-<version>.exe` | Windows installer |
-| `latest.yml` | the feed installed copies read — without it, nothing updates |
-| `Tayf-arm64.dmg`, `Tayf-x64.dmg` | macOS, manual download |
-
 The tag and the `version` field in `package.json` must match; the workflow fails fast
 if they do not, which is what `npm version` is there to prevent.
+
+**[docs/releasing.md](docs/releasing.md)** has the rest: which files have to be on a
+release and what breaks without each one, how to build and upload by hand when the
+workflow cannot run, and the handful of ways this has gone wrong before.
 
 Updates are checked by `src/main/updates.js`, which is deliberately inert unless the
 app is packaged **and** running on Windows — see the known limitations in
