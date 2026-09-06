@@ -5,6 +5,8 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-06
+
 ### Fixed
 
 - **The daily progress ring could never count anything.** It read `done / total` off
