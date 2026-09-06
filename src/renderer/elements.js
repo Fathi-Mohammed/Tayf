@@ -11,12 +11,14 @@ const IDS = [
   'snudgecheck', 'snudgecheckevery', 'snudgeoverdue', 'snudgeoverduedays', 'snudgestatuses',
   'view', 'vmain', 'vtitle', 'vmeta', 'vdesc',
   'vside', 'vcount', 'vscroll', 'vmore', 'vcomments', 'vcompose', 'vcin', 'vpeople',
+  'rank', 'rbar', 'rscope', 'rspan', 'rdates', 'rfrom', 'rto', 'rwho',
+  'rbody', 'rpodium', 'rlist', 'rnote',
   'create', 'lblboard', 'cboardwrap', 'cboard', 'cboardlist',
   'lbltype', 'ctype', 'lblassignee', 'cassigneewrap', 'cassignee', 'cassigneelist',
   'lbldue', 'duewrap', 'cdue', 'chips', 'lblest', 'cest',
   'lbldescin', 'cdescin', 'cnote', 'cdesc',
   'finish', 'ftask', 'lblfres', 'fres', 'lblftime', 'ftime', 'fest', 'fnote',
-  'foot', 'meta', 'foots', 'metas', 'footv', 'metav',
+  'foot', 'meta', 'foots', 'metas', 'footv', 'metav', 'footr', 'metar',
   'footd', 'metad', 'footc', 'metac', 'footf', 'metaf',
   'actions', 'mentions'
 ];

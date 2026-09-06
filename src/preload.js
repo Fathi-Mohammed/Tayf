@@ -27,6 +27,9 @@ contextBridge.exposeInMainWorld('tayf', {
   pickImage: () => ipcRenderer.invoke('image:pick'),
   image: (url) => ipcRenderer.invoke('item:image', url),
 
+  leaderboard: (range) => ipcRenderer.invoke('report:leaderboard', range),
+  projects: () => ipcRenderer.invoke('meta:projects'),
+
   boards: () => ipcRenderer.invoke('meta:boards'),
   boardRequirements: (boardId) => ipcRenderer.invoke('meta:boardRequirements', boardId),
   issueTypes: (projectKey) => ipcRenderer.invoke('meta:issueTypes', projectKey),

@@ -11,12 +11,13 @@ const SCREEN_PARTS = {
   compose: { roots: ['create'], footer: 'footc', bar: true, board: false },
   edit: { roots: ['create'], footer: 'footd', bar: true, board: false },
   itemView: { roots: ['view'], footer: 'footv', bar: false, board: false },
+  leaderboard: { roots: ['rank'], footer: 'footr', bar: false, board: false },
   settings: { roots: ['settings'], footer: 'foots', bar: false, board: false }
 };
 
-const ALL_ROOTS = ['list', 'msg', 'create', 'view', 'settings', 'finish'];
-const ROOT_DISPLAY = { view: 'flex' };
-const ALL_FOOTERS = ['foot', 'footc', 'footd', 'footv', 'foots', 'footf'];
+const ALL_ROOTS = ['list', 'msg', 'create', 'view', 'settings', 'finish', 'rank'];
+const ROOT_DISPLAY = { view: 'flex', rank: 'flex' };
+const ALL_FOOTERS = ['foot', 'footc', 'footd', 'footv', 'foots', 'footf', 'footr'];
 
 let flash = null;
 let flashTimer = null;

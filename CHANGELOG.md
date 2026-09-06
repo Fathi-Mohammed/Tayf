@@ -7,6 +7,23 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ### Added
 
+- **A leaderboard of who logged what — `Ctrl+R`.** The three highest sit on a podium,
+  first in the middle with a crown, and the rest follow in a ranked list with your own
+  row marked. Filter by one project or across every project you can see, over today, a
+  week, a fortnight, a month, or two dates you pick. Picking a person leaves only them
+  but keeps the rank they hold on the full board — a board where the last row standing
+  is always first would be answering a different question.
+
+  Jira has no field for "how much did this person work this fortnight": `timespent` on
+  a search result is the issue's total for everyone since it opened, and only a worklog
+  entry carries author, date and seconds together. Asking the search endpoint for the
+  `worklog` field brings those back embedded with the issues, which is what keeps a
+  fortnight across every project down to six requests instead of one per issue. Two
+  traps are pinned by tests: `/rest/api/3/search/jql` pages by `nextPageToken` and
+  ignores `startAt`, so an offset loop re-serves page one and counts it once per
+  request; and ordering by `updated` reshuffles the results under the loop, because
+  logging work is itself an update.
+
 - **Comments, read and written from the overlay.** The task page now shows the five
   newest comments under the description — author, how long ago, and the text — and
   `C` jumps to a box at the bottom where `Ctrl+Enter` posts one. The new comment
@@ -61,7 +78,22 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
   description holding a table, an image or a panel is still locked, because those are
   shapes this editor cannot carry.
 
+- **Comments moved into a rail beside the task.** The task page is two columns: the
+  details scroll on one side, the comments on the other with the box to write in pinned
+  underneath, so reading a thread no longer means scrolling past the description and
+  losing your place. Each comment carries its author's initials, name and age, and your
+  own are tinted — matched on account id, not on a display name. Only the five newest
+  were ever fetched and the rest were a line of text saying how many were left; a button
+  now pulls them ten at a time.
+
 ### Fixed
+
+- Images inside a comment arrive after the render and grow the column, so the rail holds
+  its distance from the bottom and restores it as each one lands, and lets go the moment
+  you scroll yourself.
+
+- A timestamp older than a day used to read in hours and nothing else, so a comment from
+  two months ago said "من 1400س". It reads in days for a week and then as a date.
 
 - The overlay used to vanish the moment the file dialog opened, and never came back —
   it hides on losing focus, and a native dialog takes focus. It now holds itself open

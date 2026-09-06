@@ -20,6 +20,7 @@
     "lint:fix": "eslint . --fix",
     "check-config": "node scripts/check-config.js",
     "probe-boards": "node scripts/probe-boards.js",
+    "probe-worklogs": "node scripts/probe-worklogs.js",
     "make-icons": "node scripts/make-icons.js",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",

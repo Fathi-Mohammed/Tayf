@@ -1083,6 +1083,111 @@
   #vpeople button:hover { background: var(--accent-bg); border-color: var(--accent-line); color: var(--accent); }
 
 
+  /* ── الليدربورد ─────────────────────────────────────────────────────────
+     منصة التلاتة الأوائل فوق وقايمة بالباقي تحتها. المنصة flex عادي بترتيب
+     DOM هو 2·1·3، والـ dir=rtl بيحط التاني يمين والتالت شمال — نفس صورة أي
+     منصة تتويج، متعكوسة زي ما المفروض في اتجاه عربي. */
+  #rank { display: none; flex-direction: column; min-height: 380px; overflow: hidden; }
+
+  #rbar {
+    flex: none; display: flex; align-items: center; flex-wrap: wrap;
+    gap: var(--sp-5); padding: var(--sp-5) var(--sp-7);
+    border-bottom: 1px solid var(--line);
+  }
+  .rfield { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+  .rlabel { font-size: var(--fs-subheadline); color: var(--dim); white-space: nowrap; }
+  .rfield .sel { min-width: 132px; max-width: 200px; }
+
+  #rspan { display: flex; align-items: center; gap: var(--sp-2); margin-inline-start: auto; }
+  .rchip {
+    padding: var(--sp-2) var(--sp-4); border-radius: var(--r-2);
+    font-size: var(--fs-subheadline); color: var(--muted); cursor: pointer;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .rchip:hover { background: var(--hover); color: var(--text-2); }
+  .rchip.on { background: var(--accent-bg); border-color: var(--accent-line); color: var(--accent); }
+
+  #rdates { display: none; align-items: center; gap: var(--sp-3); }
+  #rdates input {
+    padding: var(--sp-2) var(--sp-4); background: var(--fill);
+    border: 1px solid transparent; border-radius: var(--r-3);
+    color: var(--text); font-family: var(--mono); font-size: var(--fs-subheadline);
+    outline: none; color-scheme: inherit;
+  }
+  #rdates input:focus { border-color: var(--accent-line); background: var(--accent-soft); }
+
+  #rbody { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-6) var(--sp-7); }
+  #rbody::-webkit-scrollbar { width: var(--sp-4); }
+  #rbody::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: var(--r-3); }
+
+  #rpodium {
+    display: flex; align-items: flex-end; justify-content: center;
+    gap: var(--sp-6); margin-bottom: var(--sp-8);
+  }
+  .rstep {
+    display: flex; flex-direction: column; align-items: center; gap: var(--sp-2);
+    flex: 0 1 150px; min-width: 0; padding: var(--sp-5) var(--sp-4);
+    background: var(--fill-3); border: 1px solid var(--fill-2);
+    border-radius: var(--r-4); text-align: center;
+  }
+  .rstep.s1 { padding-bottom: var(--sp-8); border-color: var(--accent-line); background: var(--accent-bg); }
+  .rstep.s2 { margin-bottom: var(--sp-5); }
+  .rstep.s3 { margin-bottom: var(--sp-7); }
+  .rstep.mine { outline: 1px solid var(--accent-line); outline-offset: 2px; }
+  .rcrown { font-size: var(--fs-title2); line-height: 1; color: var(--accent); }
+
+  .rface {
+    position: relative; display: grid; place-items: center;
+    width: 46px; height: 46px; border-radius: var(--r-full);
+    background: var(--raised); color: var(--text);
+    font-family: var(--mono); font-size: var(--fs-body);
+  }
+  .rstep.s1 .rface { width: 56px; height: 56px; font-size: var(--fs-title3); }
+  .rmedal {
+    position: absolute; bottom: -4px; inset-inline-end: -4px;
+    display: grid; place-items: center; width: 18px; height: 18px;
+    border-radius: var(--r-full); background: var(--accent); color: var(--panel);
+    font-family: var(--mono); font-size: var(--fs-footnote); font-weight: 600;
+  }
+  .rwho {
+    font-size: var(--fs-callout); color: var(--text-2); line-height: var(--lh-normal);
+    overflow-wrap: anywhere;
+  }
+  .rscore { font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--accent); }
+
+  #rlist { display: flex; flex-direction: column; gap: var(--sp-2); }
+  .rrow {
+    display: flex; align-items: center; gap: var(--sp-5);
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--fill-3); border: 1px solid transparent; border-radius: var(--r-3);
+  }
+  .rrow.mine { background: var(--accent-bg); border-color: var(--accent-line); }
+  .rrank {
+    flex: none; width: 22px; text-align: center;
+    font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--dim);
+  }
+  .rface.small {
+    width: 26px; height: 26px; font-size: var(--fs-footnote);
+    background: var(--fill-2); color: var(--muted);
+  }
+  .rname {
+    flex: 1; min-width: 0; font-size: var(--fs-callout); color: var(--text-2);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .rhours { font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--text); }
+  .rempty { font-size: var(--fs-callout); color: var(--dim); padding: var(--sp-6) 0; }
+
+  #rnote {
+    flex: none; padding: var(--sp-4) var(--sp-7);
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--muted);
+  }
+
+  @media (max-width: 760px) {
+    #rpodium { gap: var(--sp-4); }
+    .rstep { flex-basis: 110px; }
+  }
+
   #mentions {
     display: none; position: fixed; z-index: 25;
     max-height: 190px; overflow-y: auto; padding: var(--sp-2);

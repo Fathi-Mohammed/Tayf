@@ -24,6 +24,8 @@ const DEFAULTS = {
   uiScale: 1,
   boardView: 'compact',
   boardFilterId: null,
+  rankScope: null,
+  rankDays: 14,
   lastBoardId: null,
   lastProjectKey: null,
   lastIssueTypeId: null,

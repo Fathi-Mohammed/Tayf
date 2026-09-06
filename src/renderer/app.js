@@ -9,6 +9,7 @@ import { transitionFormScreen } from './screens/transition-form.js';
 import { composeScreen } from './screens/compose.js';
 import { itemViewScreen } from './screens/item-view.js';
 import { settingsScreen } from './screens/settings.js';
+import { leaderboardScreen, adoptRankPreferences } from './screens/leaderboard.js';
 import { applyPreferences } from './appearance.js';
 
 const OPEN_SCREEN = {
@@ -23,6 +24,7 @@ const OPEN_SCREEN = {
   transitionFormScreen,
   composeScreen,
   itemViewScreen,
+  leaderboardScreen,
   settingsScreen
 ].forEach(registerScreen);
 
@@ -61,6 +63,7 @@ installBoard(repaint);
 window.tayf.readPreferences().then((preferences) => {
   applyPreferences(preferences);
   adoptPreferences(preferences);
+  adoptRankPreferences(preferences);
 });
 
 window.tayf.state().then((next) => {

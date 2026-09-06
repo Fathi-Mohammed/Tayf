@@ -18,6 +18,12 @@ import { transitionContext, chooseTransition } from './screens/transitions.js';
 import { submit as submitTransitionForm, copyEstimateIntoWorklog } from './screens/transition-form.js';
 import { submit as submitCompose, currentDetail as composeDetail, isEditing } from './screens/compose.js';
 import {
+  openScope,
+  openPerson,
+  refresh as refreshRank,
+  pickSpan
+} from './screens/leaderboard.js';
+import {
   currentDetail as viewedDetail,
   focusComment,
   sendComment
@@ -143,6 +149,46 @@ function handleItemView(event, key) {
   return true;
 }
 
+// The screen's shortcuts are bare letters and digits, and it owns two date
+// inputs and two searchable selects — whose search box lives on <body>, so the
+// keystroke reaches this handler by bubbling either way.
+function typingInField(event) {
+  const node = event.target;
+  return !!node && (node.tagName === 'INPUT' || node.isContentEditable);
+}
+
+function handleLeaderboard(event, key) {
+  if (event.key === 'Escape') {
+    if (typingInField(event)) return true;
+    event.preventDefault();
+    goTo('tasks').then(focusSearch);
+    return true;
+  }
+  if (typingInField(event)) return true;
+
+  if (/^[1-5]$/.test(key) && !hasCommandModifier(event) && !event.altKey) {
+    event.preventDefault();
+    pickSpan(parseInt(key, 10) - 1);
+    return true;
+  }
+  if (key === 'p') {
+    event.preventDefault();
+    openScope();
+    return true;
+  }
+  if (key === 'w') {
+    event.preventDefault();
+    openPerson();
+    return true;
+  }
+  if (key === 'r' && !hasCommandModifier(event)) {
+    event.preventDefault();
+    refreshRank();
+    return true;
+  }
+  return true;
+}
+
 function handleTransitionForm(event, key) {
   if (event.key === 'Escape') {
     event.preventDefault();
@@ -192,6 +238,7 @@ function handleCompose(event, key) {
     focusSearch();
     return true;
   }
+
   if (event.altKey && /^[1-5]$/.test(key)) {
     const quick = QUICK_DATES.find((candidate) => candidate.key === key);
     if (quick) {
@@ -333,6 +380,7 @@ function handleList(event, key, screen) {
 const SCREEN_HANDLERS = {
   settings: handleSettings,
   itemView: handleItemView,
+  leaderboard: handleLeaderboard,
   transitionForm: handleTransitionForm,
   compose: handleCompose
 };
@@ -362,6 +410,12 @@ export function installKeyboard() {
     if (hasCommandModifier(event) && key === 'm') {
       event.preventDefault();
       goTo('compose', { intent: 'create', preset: 'meeting' });
+      return;
+    }
+
+    if (hasCommandModifier(event) && key === 'r') {
+      event.preventDefault();
+      goTo('leaderboard');
       return;
     }
 

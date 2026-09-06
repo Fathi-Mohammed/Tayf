@@ -83,6 +83,20 @@ function register({ workspace, overlay, settings, actions }) {
     )
   );
 
+  ipcMain.handle('report:leaderboard', (_event, range) =>
+    fromProvider(
+      (jira) => jira.leaderboard(range),
+      (board) => ({ board })
+    )
+  );
+
+  ipcMain.handle('meta:projects', () =>
+    fromProvider(
+      (jira) => jira.projects(),
+      (projects) => ({ projects })
+    )
+  );
+
   ipcMain.handle('item:comments', (_event, { key, loaded }) =>
     fromProvider(
       (jira) => jira.olderComments(key, loaded),

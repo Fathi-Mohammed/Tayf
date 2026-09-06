@@ -123,6 +123,10 @@ function start() {
       board: {
         view: settings.get('boardView'),
         boardId: settings.get('boardFilterId')
+      },
+      rank: {
+        scope: settings.get('rankScope'),
+        days: settings.get('rankDays')
       }
     }),
     savePreferences: (patch) => {
@@ -141,6 +145,12 @@ function start() {
         settings.remember({
           boardView: patch.board.view,
           boardFilterId: patch.board.boardId
+        });
+      }
+      if (patch.rank) {
+        settings.remember({
+          rankScope: patch.rank.scope,
+          rankDays: patch.rank.days
         });
       }
       tray.update();

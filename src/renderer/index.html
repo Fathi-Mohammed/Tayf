@@ -26,6 +26,7 @@
       <div class="hrow"><span>البحث</span><kbd>Ctrl K</kbd></div>
       <div class="hrow"><span>تاسك جديدة</span><kbd>Ctrl N</kbd></div>
       <div class="hrow"><span>اجتماع سريع</span><kbd>Ctrl M</kbd></div>
+      <div class="hrow"><span>الترتيب</span><kbd>Ctrl R</kbd></div>
       <div class="hrow"><span>فلتر بالبورد</span><kbd>Ctrl B</kbd></div>
       <div class="hrow"><span>صف واحد / سطرين</span><kbd>Ctrl L</kbd></div>
     </div>
@@ -354,6 +355,36 @@
       </div>
     </div>
 
+    <div id="rank">
+      <div id="rbar">
+        <div class="rfield">
+          <span class="rlabel">المشروع</span>
+          <div class="sel" id="rscope"></div>
+        </div>
+        <div id="rspan">
+          <span class="rchip" data-d="1">النهاردة</span>
+          <span class="rchip" data-d="7">أسبوع</span>
+          <span class="rchip on" data-d="14">١٤ يوم</span>
+          <span class="rchip" data-d="30">٣٠ يوم</span>
+          <span class="rchip" data-d="0">مدى محدد</span>
+        </div>
+        <div id="rdates">
+          <input id="rfrom" type="date" />
+          <input id="rto" type="date" />
+        </div>
+        <div class="rfield">
+          <span class="rlabel">الشخص</span>
+          <div class="sel" id="rwho"></div>
+        </div>
+      </div>
+
+      <div id="rbody">
+        <div id="rpodium"></div>
+        <div id="rlist"></div>
+      </div>
+      <div id="rnote"></div>
+    </div>
+
     <div id="create">
       <div class="cgrid">
         <label for="cboard" id="lblboard">البورد</label>
@@ -444,6 +475,14 @@
       <span><kbd>Enter</kbd> غيّر الحالة</span>
       <span><kbd>Esc</kbd> رجوع</span>
       <span id="metaf"></span>
+    </div>
+    <div id="footr">
+      <span><kbd>1-5</kbd> الفترة</span>
+      <span><kbd>P</kbd> المشروع</span>
+      <span><kbd>W</kbd> الشخص</span>
+      <span><kbd>R</kbd> حدّث</span>
+      <span><kbd>Esc</kbd> رجوع</span>
+      <span id="metar"></span>
     </div>
   </div>
  </div>

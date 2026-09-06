@@ -5,6 +5,7 @@ const issues = require('./issues');
 const boards = require('./boards');
 const metadata = require('./metadata');
 const attachments = require('./attachments');
+const worklogs = require('./worklogs');
 
 class JiraProvider {
   constructor(credentials) {
@@ -37,6 +38,10 @@ class JiraProvider {
 
   updateItem(key, fields) {
     return issues.updateItem(this.client, key, fields);
+  }
+
+  leaderboard(range) {
+    return worklogs.fetchLeaderboard(this.client, range);
   }
 
   olderComments(key, loaded) {
