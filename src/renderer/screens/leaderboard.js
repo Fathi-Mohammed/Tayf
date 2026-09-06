@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setFooterMeta } from '../chrome.js';
@@ -41,7 +42,7 @@ function activeRange() {
 
 function initialsOf(name) {
   const words = String(name || '').trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return '؟';
+  if (!words.length) return t("؟");
   return words.slice(0, 2).map((word) => [...word][0]).join('');
 }
 
@@ -86,7 +87,7 @@ function podiumHtml(people) {
 
 function rowHtml(person, rank) {
   const mine = isMe(person);
-  const name = mine ? `${person.name} (إنت)` : person.name;
+  const name = mine ? t("{0} (إنت)", [person.name]) : person.name;
 
   return (
     `<div class="rrow${mine ? ' mine' : ''}">` +
@@ -108,9 +109,9 @@ function shown(people) {
 }
 
 function noteText(board) {
-  const parts = [`${board.issues} تاسك`, `${board.entries} تسجيلة`];
-  if (board.cappedPages) parts.push('⚠ الشغل أكتر من اللي اتقرا');
-  if (board.missedIssues) parts.push(`⚠ ${board.missedIssues} تاسك مقروش كاملين`);
+  const parts = [t("{0} تاسك", [board.issues]), t("{0} تسجيلة", [board.entries])];
+  if (board.cappedPages) parts.push(t("⚠ الشغل أكتر من اللي اتقرا"));
+  if (board.missedIssues) parts.push(t("⚠ {0} تاسك مقروش كاملين", [board.missedIssues]));
   return parts.join('  ·  ');
 }
 
@@ -127,7 +128,7 @@ function paintPeople() {
   const rest = context.person ? rows : rows.slice(PODIUM);
   elements.rlist.innerHTML = rest.length
     ? rest.map(({ person, rank }) => rowHtml(person, rank)).join('')
-    : '<div class="rempty">مفيش حد سجّل شغل في الفترة دي.</div>';
+    : `<div class="rempty">${t("مفيش حد سجّل شغل في الفترة دي.")}</div>`;
 }
 
 function paintFilters() {
@@ -144,13 +145,13 @@ function remember() {
 async function load() {
   const { from, to } = activeRange();
   if (!from || !to || from > to) {
-    elements.rnote.textContent = 'المدى مش مظبوط — تاريخ البداية بعد النهاية.';
+    elements.rnote.textContent = t("المدى مش مظبوط — تاريخ البداية بعد النهاية.");
     return;
   }
 
   const requestId = ++context.requestId;
   context.loading = true;
-  elements.rnote.textContent = 'بيحسب…';
+  elements.rnote.textContent = t("بيحسب…");
 
   const response = await window.tayf.leaderboard({
     projectKey: context.scope === ALL_PROJECTS ? null : context.scope,
@@ -172,7 +173,7 @@ async function load() {
   context.board = response.board;
   personSelect.setOptions(
     [
-      { id: '', label: 'الكل' },
+      { id: '', label: t("الكل") },
       ...response.board.people.map((person) => ({
         id: person.id || person.name,
         label: person.name
@@ -192,7 +193,7 @@ async function loadProjects() {
 
   scopeSelect.setOptions(
     [
-      { id: ALL_PROJECTS, label: 'كل المشاريع' },
+      { id: ALL_PROJECTS, label: t("كل المشاريع") },
       ...projects.map((project) => ({ id: project.key, label: `${project.key} — ${project.name}` }))
     ],
     context.scope
@@ -240,7 +241,7 @@ export const leaderboardScreen = {
     paintFilters();
 
     if (!context.board) {
-      elements.rnote.textContent = 'بيحسب…';
+      elements.rnote.textContent = t("بيحسب…");
       await loadProjects();
     }
     await load();
@@ -260,7 +261,7 @@ export const leaderboardScreen = {
 
 scopeSelect = createSelect('rscope', {
   searchable: true,
-  emptyLabel: 'كل المشاريع',
+  emptyLabel: t("كل المشاريع"),
   onChange: (value) => {
     context.scope = value || ALL_PROJECTS;
     context.person = '';
@@ -271,7 +272,7 @@ scopeSelect = createSelect('rscope', {
 
 personSelect = createSelect('rwho', {
   searchable: true,
-  emptyLabel: 'الكل',
+  emptyLabel: t("الكل"),
   onChange: (value) => {
     context.person = value || '';
     paintPeople();

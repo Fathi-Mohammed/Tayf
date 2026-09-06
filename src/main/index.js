@@ -17,7 +17,7 @@ const { createUpdates } = require('./updates');
 const { createNudges } = require('./nudges');
 const { relaunch } = require('./relaunch');
 const ipc = require('./ipc');
-const { NOTIFICATION_TEXT } = require('../strings');
+const { NOTIFICATION_TEXT, setLanguage } = require('../strings');
 
 const REFRESH_INTERVAL_MS = 60_000;
 const OPEN_TIME_BUDGET_MS = 500;
@@ -59,6 +59,7 @@ function start() {
   Menu.setApplicationMenu(applicationMenu());
 
   const settings = createSettings();
+  setLanguage(settings.get('language'));
   const workspace = new Workspace({
     cache: { read: cache.readCache, write: cache.writeCache },
     log
@@ -116,6 +117,7 @@ function start() {
       composeChoices: hotkeyChoices(platform.composeHotkeys),
       autoStart: autostart.isEnabled(),
       appearance: settings.get('appearance'),
+      language: settings.get('language'),
       theme: settings.get('theme'),
       font: settings.get('font'),
       uiScale: settings.get('uiScale'),
@@ -134,6 +136,10 @@ function start() {
       if (patch.composeHotkey) hotkeys.chooseCompose(patch.composeHotkey);
       if (typeof patch.autoStart === 'boolean') autostart.setEnabled(patch.autoStart);
       if (patch.appearance) settings.set('appearance', patch.appearance);
+      if (['ar', 'en'].includes(patch.language)) {
+        settings.set('language', patch.language);
+        setLanguage(patch.language);
+      }
       if (patch.theme) settings.set('theme', patch.theme);
       if (patch.font) settings.set('font', patch.font);
       if (typeof patch.uiScale === 'number') {

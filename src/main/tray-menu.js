@@ -4,7 +4,7 @@ const path = require('path');
 const { app, Tray, Menu, nativeTheme, shell } = require('electron');
 const platform = require('./platform');
 const autostart = require('./autostart');
-const { TRAY_TEXT } = require('../strings');
+const { TRAY_TEXT, getLocale } = require('../strings');
 
 const ASSETS = path.join(__dirname, '..', '..', 'assets');
 
@@ -23,7 +23,7 @@ function withHotkey(label, accelerator) {
 }
 
 function clockTime(timestamp) {
-  return new Date(timestamp).toLocaleTimeString('ar-EG', {
+  return new Date(timestamp).toLocaleTimeString(getLocale(), {
     hour: '2-digit',
     minute: '2-digit'
   });

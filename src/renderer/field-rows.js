@@ -1,8 +1,9 @@
+import { t } from './i18n.js';
 import { escapeHtml } from './format.js';
 import { parseDueDate, parseEstimate } from './dates.js';
 
-const DATE_PLACEHOLDER = 'النهاردة · بكرة · +3 · 2026-09-05';
-const ESTIMATE_PLACEHOLDER = 'اكتب رقم بالدقايق أو 4h · 2d';
+const DATE_PLACEHOLDER = t("النهاردة · بكرة · +3 · 2026-09-05");
+const ESTIMATE_PLACEHOLDER = t("اكتب رقم بالدقايق أو 4h · 2d");
 
 export function createGridRows(grid, anchor) {
   let nodes = [];
@@ -144,7 +145,7 @@ export function renderRequiredRows(rows, requiredFields, onFeedback) {
 }
 
 export function collectRequiredRows(entries) {
-  const missing = ' لازم يتملا قبل ما التاسك تبدأ';
+  const missing = t(" لازم يتملا قبل ما التاسك تبدأ");
   const fields = {};
 
   for (const { field, element } of entries) {

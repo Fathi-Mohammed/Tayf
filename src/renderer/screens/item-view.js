@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { state } from '../state.js';
 import { showLayout, paintBanners, setContext, setFooterMeta, setFlash } from '../chrome.js';
@@ -33,7 +34,7 @@ function imagesOf(detail) {
 // بين اللي بيتكلموا وإنت بتقرا سريع.
 function initialsOf(name) {
   const words = String(name || '').trim().split(/\s+/).filter(Boolean);
-  if (!words.length) return '؟';
+  if (!words.length) return t("؟");
   return words.slice(0, 2).map((word) => [...word][0]).join('');
 }
 
@@ -59,7 +60,7 @@ function commentNode(comment, resolve) {
   head.className = 'vwhen';
   const who = document.createElement('b');
   who.dir = 'auto';
-  who.textContent = comment.author || 'مش معروف';
+  who.textContent = comment.author || t("مش معروف");
   const when = document.createElement('i');
   when.textContent = comment.at ? relativeTime(Date.parse(comment.at)) : '';
   head.append(who, when);
@@ -78,14 +79,14 @@ function commentNode(comment, resolve) {
 
 function countText(shown, total) {
   if (!total) return '';
-  return shown < total ? `${shown} من ${total}` : String(total);
+  return shown < total ? t("{0} من {1}", [shown, total]) : String(total);
 }
 
 function moreText(older) {
-  if (older === 1) return 'اعرض الكومنت الأقدم';
-  if (older === 2) return 'اعرض الكومنتين الأقدم';
-  if (older <= 10) return `اعرض ${older} كومنتات أقدم`;
-  return `اعرض ${older} كومنت أقدم`;
+  if (older === 1) return t("اعرض الكومنت الأقدم");
+  if (older === 2) return t("اعرض الكومنتين الأقدم");
+  if (older <= 10) return t("اعرض {0} كومنتات أقدم", [older]);
+  return t("اعرض {0} كومنت أقدم", [older]);
 }
 
 function paintMore(detail) {
@@ -94,7 +95,7 @@ function paintMore(detail) {
 
   elements.vmore.style.display = older ? 'block' : 'none';
   elements.vmore.disabled = context.loadingOlder;
-  elements.vmore.textContent = context.loadingOlder ? 'بيحمّل…' : moreText(older);
+  elements.vmore.textContent = context.loadingOlder ? t("بيحمّل…") : moreText(older);
 }
 
 // الصور بتوصل بعد ما الكومنتات تترسم وبتزوّد الطول، فبنمسك المسافة من تحت
@@ -128,7 +129,7 @@ function renderComments(detail, { toNewest = false } = {}) {
   if (!comments.length) {
     const line = document.createElement('div');
     line.className = 'vempty';
-    line.textContent = 'مفيش كومنتات لسه — ابدأ إنت.';
+    line.textContent = t("مفيش كومنتات لسه — ابدأ إنت.");
     elements.vcomments.appendChild(line);
     return;
   }
@@ -224,19 +225,19 @@ export async function sendComment() {
 function metaEntries(item, detail) {
   const entries = [
     ['', detail.key],
-    ['النوع', detail.type || '-'],
-    ['الحالة', detail.status || '-'],
-    ['مسندة لـ', detail.assignee || 'مش مسندة']
+    [t("النوع"), detail.type || '-'],
+    [t("الحالة"), detail.status || '-'],
+    [t("مسندة لـ"), detail.assignee || t("مش مسندة")]
   ];
 
   if ((item.boards || []).length) {
-    entries.push(['البورد', item.boards.map((board) => board.name).join('، ')]);
+    entries.push([t("البورد"), item.boards.map((board) => board.name).join(t("، "))]);
   }
-  if (detail.due) entries.push(['التسليم', detail.due]);
-  if (detail.estimate) entries.push(['الوقت', detail.estimate]);
+  if (detail.due) entries.push([t("التسليم"), detail.due]);
+  if (detail.estimate) entries.push([t("الوقت"), detail.estimate]);
 
   Object.values(detail.optionValues || {}).forEach((option) => entries.push(['', option.value]));
-  if ((detail.labels || []).length) entries.push(['labels', detail.labels.join('، ')]);
+  if ((detail.labels || []).length) entries.push(['labels', detail.labels.join(t("، "))]);
 
   return entries;
 }
@@ -251,7 +252,7 @@ export const itemViewScreen = {
 
     elements.vtitle.textContent = item.title || UNTITLED;
     elements.vmeta.innerHTML = '';
-    elements.vdesc.textContent = 'بيحمّل…';
+    elements.vdesc.textContent = t("بيحمّل…");
     elements.vdesc.className = 'empty';
     clearEditor(elements.vcin);
     renderComments(null);
@@ -294,7 +295,7 @@ export const itemViewScreen = {
       elements.vdesc.textContent = detail.description;
       elements.vdesc.className = '';
     } else {
-      elements.vdesc.textContent = 'مفيش وصف للتاسك دي.';
+      elements.vdesc.textContent = t("مفيش وصف للتاسك دي.");
       elements.vdesc.className = 'empty';
     }
 

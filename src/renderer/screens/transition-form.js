@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 import elements from '../elements.js';
 import { showLayout, paintBanners, setVisible, setFooterMeta } from '../chrome.js';
 import { escapeHtml } from '../format.js';
@@ -5,9 +6,9 @@ import { parseEstimate } from '../dates.js';
 import { createGridRows, renderRequiredRows, collectRequiredRows } from '../field-rows.js';
 import { transitionContext, needsWorklog, needsRequiredFields, runTransition } from './transitions.js';
 
-const WORKLOG_HINT = 'الوقت ده بيتسجل شغل على التاسك — من غيره جيرا مش هيعدّي الحالة.';
-const REQUIRED_HINT = 'التاسك مش بتبدأ من غير دول — هيتحفظوا عليها الأول وبعدين تتنقل.';
-const MISSING_WORKLOG = 'اكتب الوقت اللي التاسك خدته — من غيره جيرا هيرفض.';
+const WORKLOG_HINT = t("الوقت ده بيتسجل شغل على التاسك — من غيره جيرا مش هيعدّي الحالة.");
+const REQUIRED_HINT = t("التاسك مش بتبدأ من غير دول — هيتحفظوا عليها الأول وبعدين تتنقل.");
+const MISSING_WORKLOG = t("اكتب الوقت اللي التاسك خدته — من غيره جيرا هيرفض.");
 
 let rows = null;
 let requiredEntries = [];
@@ -22,7 +23,7 @@ export function copyEstimateIntoWorklog() {
   if (!item || !item.estimate || elements.ftime.style.display === 'none') return;
   elements.ftime.value = item.estimate;
   elements.ftime.focus();
-  setNote(`الوقت اللي هيتسجل: ${item.estimate}`, 'good');
+  setNote(t("الوقت اللي هيتسجل: {0}", [item.estimate]), 'good');
 }
 
 export function submit() {
@@ -97,9 +98,9 @@ export const transitionFormScreen = {
     setVisible(elements.fest, wantsWorklog, 'flex');
     if (wantsWorklog) {
       elements.fest.innerHTML = item.estimate
-        ? `المتوقع كان <b>${escapeHtml(item.estimate)}</b>` +
-          '<span class="chip" id="festfill"><b>Alt1</b>حطّه زي ما هو</span>'
-        : 'مفيش وقت متوقع متسجّل على التاسك';
+        ? t("المتوقع كان <b>{0}</b>", [escapeHtml(item.estimate)]) +
+          t("<span class=\"chip\" id=\"festfill\"><b>Alt1</b>حطّه زي ما هو</span>")
+        : t("مفيش وقت متوقع متسجّل على التاسك");
     }
 
     const wantsRequired = needsRequiredFields(transition);
@@ -138,7 +139,7 @@ elements.ftime.addEventListener('input', () => {
     return;
   }
   const parsed = parseEstimate(elements.ftime.value);
-  setNote(parsed.ok ? `هيتسجل: ${parsed.value}` : parsed.label, parsed.ok ? 'good' : 'bad');
+  setNote(parsed.ok ? t("هيتسجل: {0}", [parsed.value]) : parsed.label, parsed.ok ? 'good' : 'bad');
 });
 
 elements.fest.addEventListener('click', (event) => {

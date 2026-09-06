@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { escapeHtml } from './format.js';
 
 // قايمة اختيار: زرار بيفتح لوحة، مع بحث لما الاختيارات تكتر، واختيار مفرد أو متعدد.
@@ -97,7 +98,7 @@ export function createSelect(hostId, { multiple, searchable, emptyLabel, summary
     }
 
     const labels = picked.map((option) => option.label);
-    const text = summary ? summary(labels) : labels.join('، ');
+    const text = summary ? summary(labels) : labels.join(t("، "));
     const dot = picked.length === 1 ? dotMarkup(picked[0].dot) : '';
     valueSlot.innerHTML = `${dot}<span class="sel-text">${escapeHtml(text)}</span>`;
   }
@@ -106,7 +107,7 @@ export function createSelect(hostId, { multiple, searchable, emptyLabel, summary
   // كده خانة البحث ماتتمسحش تحت إيد المستخدم والفوكس يفضل فيها بعد كل اختيار.
   function buildShell() {
     const search = wantsSearch()
-      ? '<div class="sel-search"><input type="text" spellcheck="false" placeholder="دوّر…" /></div>'
+      ? t("<div class=\"sel-search\"><input type=\"text\" spellcheck=\"false\" placeholder=\"دوّر…\" /></div>")
       : '';
     panel.innerHTML = `${search}<div class="sel-list" role="listbox"></div>`;
     listBox = panel.querySelector('.sel-list');
@@ -129,7 +130,7 @@ export function createSelect(hostId, { multiple, searchable, emptyLabel, summary
             );
           })
           .join('')
-      : '<div class="sel-empty">مفيش نتايج</div>';
+      : t("<div class=\"sel-empty\">مفيش نتايج</div>");
 
     const current = listBox.children[highlighted];
     if (current && current.scrollIntoView) current.scrollIntoView({ block: 'nearest' });
@@ -147,7 +148,7 @@ export function createSelect(hostId, { multiple, searchable, emptyLabel, summary
       top = Math.max(EDGE_GAP, rect.top - height - PANEL_GAP);
     }
 
-    let left = rect.right - width;
+    let left = document.documentElement.dir === 'ltr' ? rect.left : rect.right - width;
     if (left + width > window.innerWidth - EDGE_GAP) left = window.innerWidth - width - EDGE_GAP;
     if (left < EDGE_GAP) left = EDGE_GAP;
 
