@@ -12,7 +12,8 @@ export const THEMES = [
   { value: 'one-dark', label: 'One Dark Pro' },
   { value: 'dracula', label: 'Dracula' },
   { value: 'nord', label: 'Nord' },
-  { value: 'github', label: 'GitHub' }
+  { value: 'github', label: 'GitHub' },
+  { value: 'glassify', label: 'Glassify' }
 ];
 
 export const FONTS = [

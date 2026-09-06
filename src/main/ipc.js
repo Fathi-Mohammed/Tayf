@@ -69,6 +69,9 @@ function register({ workspace, overlay, settings, actions }) {
     serialiseState(workspace.state, settings.get('nudgeWorkingStatuses'))
   );
 
+  // بيرجّع لما القراية تخلص فعلاً — الطبقة مستنية ده عشان توقّف السبينر.
+  ipcMain.handle('workspace:refresh', () => workspace.refresh());
+
   ipcMain.handle('item:transitions', (_event, key) =>
     fromProvider(
       (jira) => jira.transitions(key),

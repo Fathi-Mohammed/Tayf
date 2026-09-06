@@ -5,6 +5,43 @@ While Tayf is on 0.x, a minor bump is a feature and a patch is a fix.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The daily progress ring could never count anything.** It read `done / total` off
+  the assigned list, but that list is fetched with `statusCategory != Done` — a task
+  leaves it the moment you close one, so the numerator was structurally stuck at zero
+  and the ring went straight from `0/1` to nothing at all. The overlay now reads the
+  work you closed today alongside the open list and counts both sides of it.
+
+- **The progress bar on the active-task card always read full.** It carried its width
+  in an inline `style` attribute, which the overlay’s own Content-Security-Policy
+  (`style-src 'self'`) blocks — so the bar fell back to filling its whole track
+  whatever the real ratio was. The width is set from script now, which the policy
+  allows.
+
+### Added
+
+- **Refresh the list yourself — `F5`, or the button beside the view toggles.** The
+  overlay already polled every minute, but there was no way to ask for a read and no
+  sign that one was happening. The button spins while your refresh is in flight; the
+  minute-by-minute poll stays silent, as it should.
+
+- **A refresh that lands during another one now waits its turn instead of being
+  dropped.** Every write asks for a read behind it, so a task you moved or created
+  could go missing from the list for up to a minute whenever that read collided with
+  the poll. Overlapping requests now collapse into one follow-up read.
+
+- **Loading states where there were none.** A cold start says it is fetching your
+  tasks instead of claiming none are assigned to you, and the leaderboard dims the
+  standing numbers behind a spinner while it recalculates rather than going quiet.
+
+- **Glassify, a sixth theme.** Its surfaces are translucent rather than solid, and they
+  frost their own backdrop on top of the blur the overlay already applies — so whatever
+  sits behind the panel reads as an ambient tint rather than as content competing with
+  the tasks. Cool slate with an ice accent, in a light and a dark face like the rest.
+  Turning on the system reduced-transparency setting makes its surfaces solid and drops
+  the extra blur, the same way it already drops the backdrop blur.
+
 ## [0.9.0] - 2026-09-06
 
 ### Added

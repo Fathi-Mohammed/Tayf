@@ -131,6 +131,19 @@ function paintPeople() {
     : `<div class="rempty">${t("مفيش حد سجّل شغل في الفترة دي.")}</div>`;
 }
 
+function paintLoading() {
+  elements.rbody.classList.add('loading');
+  elements.rnote.innerHTML = `<span class="spin"></span><span>${t("بيحسب…")}</span>`;
+  if (context.board) return;
+
+  elements.rpodium.style.display = 'none';
+  elements.rlist.innerHTML = `<div class="rempty">${t("بيجيب تسجيلات الشغل…")}</div>`;
+}
+
+function doneLoading() {
+  elements.rbody.classList.remove('loading');
+}
+
 function paintFilters() {
   [...elements.rspan.children].forEach((chip) => {
     chip.classList.toggle('on', Number(chip.dataset.d) === context.days);
@@ -145,13 +158,14 @@ function remember() {
 async function load() {
   const { from, to } = activeRange();
   if (!from || !to || from > to) {
+    doneLoading();
     elements.rnote.textContent = t("المدى مش مظبوط — تاريخ البداية بعد النهاية.");
     return;
   }
 
   const requestId = ++context.requestId;
   context.loading = true;
-  elements.rnote.textContent = t("بيحسب…");
+  paintLoading();
 
   const response = await window.tayf.leaderboard({
     projectKey: context.scope === ALL_PROJECTS ? null : context.scope,
@@ -161,6 +175,7 @@ async function load() {
 
   if (requestId !== context.requestId) return;
   context.loading = false;
+  doneLoading();
 
   if (response.error) {
     context.board = null;
@@ -241,7 +256,7 @@ export const leaderboardScreen = {
     paintFilters();
 
     if (!context.board) {
-      elements.rnote.textContent = t("بيحسب…");
+      paintLoading();
       await loadProjects();
     }
     await load();
@@ -250,6 +265,7 @@ export const leaderboardScreen = {
   leave() {
     context.requestId += 1;
     context.loading = false;
+    doneLoading();
   },
 
   render() {

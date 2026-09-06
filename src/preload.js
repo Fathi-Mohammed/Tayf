@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('tayf', {
   onShown: (handler) => ipcRenderer.on('overlay:shown', (_event, payload) => handler(payload)),
   onState: (handler) => ipcRenderer.on('workspace:state', (_event, state) => handler(state)),
   state: () => ipcRenderer.invoke('workspace:state'),
+  refresh: () => ipcRenderer.invoke('workspace:refresh'),
 
   close: () => ipcRenderer.send('overlay:close'),
   quit: () => ipcRenderer.send('overlay:quit'),

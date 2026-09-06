@@ -32,6 +32,10 @@ class JiraProvider {
     return issues.fetchAssignedItems(this.client);
   }
 
+  closedToday() {
+    return issues.fetchClosedToday(this.client);
+  }
+
   item(key) {
     return issues.fetchItem(this.client, key);
   }

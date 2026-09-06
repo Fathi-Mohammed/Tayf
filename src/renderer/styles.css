@@ -122,9 +122,14 @@
     --th-dracula:  #282a36;  --th-dracula-2:  #bd93f9;
     --th-nord:     #2e3440;  --th-nord-2:     #88c0d0;
     --th-github:   #0d1117;  --th-github-2:   #58a6ff;
+    --th-glassify: #131823;  --th-glassify-2: #7fd8e8;
 
     /* خلفية الكنترول المرفوع — الاختيار الشغّال في مجموعة الأزرار */
     --raised: #2b2b34;
+
+    /* بلور الأسطح نفسها. none عند كل الثيمات الصلبة، فالقاعدة اللي بتستخدمه
+       مالهاش أثر عندهم ولا بتعمل stacking context. */
+    --glass: none;
 
     /* سهم السيليكت — data URI فمش بيورث currentColor، فلكل وضع نسخته */
     --chevron: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b9da6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
@@ -194,6 +199,7 @@
     --th-dracula:  #fdf9ee;  --th-dracula-2:  #644ac9;
     --th-nord:     #eceff4;  --th-nord-2:     #3f6a99;
     --th-github:   #f6f8fa;  --th-github-2:   #0969da;
+    --th-glassify: #eef3fa;  --th-glassify-2: #0e7490;
 
     --raised: #ffffff;
     --chevron: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2354565e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
@@ -347,6 +353,33 @@
     --st-new: #656d76;  --st-work: #0550ae;  --st-work-txt: #0550ae;  --st-done: #1a7f37;
   }
 
+  /* الثيم ده مش بالتة ألوان بس زي إخواته — الأسطح نفسها شفافة وبتبلوّر اللي
+     وراها بـ --glass. --elev-2 فضل صلب لأنه بيروح لـ <option> والقايمة دي
+     بيرسمها النظام مش الصفحة، فالشفافية معاها بتطلع وحشة. */
+  :root[data-theme="glassify"] { --glass: blur(48px) saturate(150%); }
+
+  :root[data-appearance="dark"][data-theme="glassify"] {
+    --scrim: rgba(6,10,18,.44);  --scrim-solid: #0d121b;
+    --panel: rgba(19,24,35,.82);  --elev: rgba(31,38,53,.92);  --elev-2: #1b2130;
+    --raised: rgba(233,238,247,.14);
+    --line: color-mix(in srgb, var(--text) 14%, transparent);
+    --text: #e9eef7;  --text-2: #d2dbe9;  --text-3: #bac4d4;
+    --muted: #93a0b5;  --dim: #6d7b92;
+    --accent: #7fd8e8;
+    --st-new: #7a8698;  --st-work: #74b8f0;  --st-work-txt: #9bcdf5;  --st-done: #86d6ae;
+  }
+
+  :root[data-appearance="light"][data-theme="glassify"] {
+    --scrim: rgba(236,242,250,.44);  --scrim-solid: #e3eaf3;
+    --panel: rgba(255,255,255,.82);  --elev: rgba(255,255,255,.94);  --elev-2: #f1f5fa;
+    --raised: #ffffff;
+    --line: color-mix(in srgb, var(--text) 16%, transparent);
+    --text: #1e2733;  --text-2: #323c4a;  --text-3: #4a5464;
+    --muted: #5b6675;  --dim: #8492a3;
+    --accent: #0e7490;
+    --st-new: #5b6675;  --st-work: #1668a8;  --st-work-txt: #1668a8;  --st-done: #2f7d55;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; background: transparent; overflow: hidden; }
   body { font-family: var(--sans); color: var(--text); user-select: none; cursor: default; }
@@ -377,6 +410,14 @@
     overflow: hidden;
     animation: rise .11s cubic-bezier(.2,.8,.3,1);
   }
+  /* الأسطح اللي ممكن تكون شفافة بتبلوّر خلفيتها هي كمان. ده جاي فوق بلور
+     #backdrop مش بدله، فالنتيجة أقوى منه بكتير واللي ورا الطبقة بيبقى لون
+     مسطوح مش محتوى تقدر تقراه. الأربعة الأخيرة كلهم برّه #panel، و#panel
+     نفسه مفيش جواه أي عنصر fixed — يعني القاعدة دي مش بتحرّك حاجة. */
+  #panel, .card, #brdlist, #actions, #mentions, .sel-panel {
+    backdrop-filter: var(--glass);
+  }
+
   @keyframes fade { from { opacity: 0 } to { opacity: 1 } }
   @keyframes rise { from { transform: translateY(-6px); opacity: 0 } to { transform: none; opacity: 1 } }
   @media (prefers-reduced-motion: reduce) {
@@ -388,6 +429,15 @@
     #backdrop {
       background: var(--scrim-solid);
       backdrop-filter: none;
+    }
+
+    /* الزجاجي قايم على الشفافية نفسها، فلو المستخدم قافلها بنرجّع أسطحه صلبة. */
+    :root[data-theme="glassify"] { --glass: none; }
+    :root[data-appearance="dark"][data-theme="glassify"] {
+      --panel: #131823;  --elev: #1f2635;  --raised: #2b3346;
+    }
+    :root[data-appearance="light"][data-theme="glassify"] {
+      --panel: #ffffff;  --elev: #ffffff;  --raised: #ffffff;
     }
   }
 
@@ -468,7 +518,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .toast { animation: none; }
-    .spin { animation: none; }
+    .spin, #reload.busy svg { animation: none; }
   }
 
   #list { overflow-y: auto; padding: var(--sp-3) 0; }
@@ -634,6 +684,11 @@
   .vbtn svg { width: 14px; height: 14px; }
   .vbtn:hover { color: var(--text-2); }
   .vbtn.on { background: var(--fill-2); color: var(--text); }
+
+  /* زرار التحديث برّه مجموعة #views عن قصد — الكليك جوّاها بيقرا data-v.
+     و.busy مش .on عشان ميخدش خلفية الاختيار الشغّال وهو بيلف. */
+  #reload.busy { color: var(--accent); }
+  #reload.busy svg { animation: spin .7s linear infinite; }
 
   #side { display: none; order: 1; flex: 0 0 268px; flex-direction: column; gap: var(--sp-5); }
   .card {
@@ -840,6 +895,7 @@
   .sel-dot[data-dot="dracula"]  { --dot: var(--th-dracula);  --dot-2: var(--th-dracula-2); }
   .sel-dot[data-dot="nord"]     { --dot: var(--th-nord);     --dot-2: var(--th-nord-2); }
   .sel-dot[data-dot="github"]   { --dot: var(--th-github);   --dot-2: var(--th-github-2); }
+  .sel-dot[data-dot="glassify"] { --dot: var(--th-glassify); --dot-2: var(--th-glassify-2); }
 
   /* مجموعة أزرار — بديل السيليكت لما الاختيارات قليلة وليها أيقونات.
      راديو حقيقي مخفي جوه كل زر، فالتنقل بالأسهم والـ change بييجوا من المتصفح. */
@@ -1118,6 +1174,9 @@
   #rdates input:focus { border-color: var(--accent-line); background: var(--accent-soft); }
 
   #rbody { flex: 1; min-height: 0; overflow-y: auto; padding: var(--sp-6) var(--sp-7); }
+  /* الأرقام القديمة بتفضل مكانها وهي باهتة وهو بيحسب — أهون من إنها تختفي
+     وترجع مع كل تغيير فلتر. */
+  #rbody.loading { opacity: .45; pointer-events: none; }
   #rbody::-webkit-scrollbar { width: var(--sp-4); }
   #rbody::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: var(--r-3); }
 
@@ -1147,7 +1206,7 @@
   .rmedal {
     position: absolute; bottom: -4px; inset-inline-end: -4px;
     display: grid; place-items: center; width: 18px; height: 18px;
-    border-radius: var(--r-full); background: var(--accent); color: var(--panel);
+    border-radius: var(--r-full); background: var(--accent); color: var(--scrim-solid);
     font-family: var(--mono); font-size: var(--fs-footnote); font-weight: 600;
   }
   .rwho {
@@ -1179,7 +1238,8 @@
   .rempty { font-size: var(--fs-callout); color: var(--dim); padding: var(--sp-6) 0; }
 
   #rnote {
-    flex: none; padding: var(--sp-4) var(--sp-7);
+    flex: none; display: flex; align-items: center; gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-7);
     border-top: 1px solid var(--line);
     font-family: var(--mono); font-size: var(--fs-subheadline); color: var(--muted);
   }

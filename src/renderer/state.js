@@ -4,6 +4,7 @@ export const state = {
     error: null,
     failure: null,
     items: [],
+    closedToday: [],
     fetchedAt: null,
     user: null,
     transitionsNeedingWorklog: [],

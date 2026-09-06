@@ -120,6 +120,21 @@ against the issue's attachment list to find a URL worth fetching.
 `taskList` and every `taskItem` inside it need a `localId`. Without them the whole
 document is rejected. `rich-text.js` generates UUIDs for both.
 
+### Closing a task removes it from the list it was counted in
+
+The assigned list is `assignee = currentUser() AND statusCategory != Done`, so a task
+leaves it the moment it is closed. Anything that wants to count *finished* work — the
+"today's progress" ring — cannot read it from that list; the numerator is structurally
+always zero.
+
+**What the code does:** `issues.js → fetchClosedToday` runs a second search for work
+closed today, and `workspace.js` reads both in parallel and keeps them apart in state.
+
+The second query filters on `statusCategoryChangedDate >= startOfDay()`, **not**
+`resolved`. A workflow can move an issue into a Done-category status without setting a
+resolution, and then `resolutiondate` stays empty and the issue is never counted.
+That read is deliberately non-fatal: if Jira rejects it, the open list still lands.
+
 ### Rate limits
 
 Jira Cloud returns `429` with `Retry-After` under a cost-based system. The client

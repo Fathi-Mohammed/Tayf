@@ -29,6 +29,7 @@
       <div class="hrow"><span>الترتيب</span><kbd>Ctrl R</kbd></div>
       <div class="hrow"><span>فلتر بالبورد</span><kbd>Ctrl B</kbd></div>
       <div class="hrow"><span>صف واحد / سطرين</span><kbd>Ctrl L</kbd></div>
+      <div class="hrow"><span>تحديث القائمة</span><kbd>F5</kbd></div>
     </div>
   </div>
 
@@ -65,6 +66,12 @@
           </svg>
         </button>
       </div>
+      <button id="reload" class="vbtn" title="حدّث القائمة">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13.6 8a5.6 5.6 0 1 1-1.64-3.96" />
+          <path d="M13.6 2.6v3.2h-3.2" />
+        </svg>
+      </button>
     </div>
     <div id="ctx"></div>
     <div id="list"></div>
@@ -314,7 +321,7 @@
             <div class="srow">
               <div class="scell">
                 <label class="stitle">الثيم</label>
-                <div class="shint">خمسة من VS Code، وكل واحد بوجه فاتح وغامق.</div>
+                <div class="shint">خمسة من VS Code وواحد زجاجي، وكل واحد بوجه فاتح وغامق.</div>
               </div>
               <div class="sctl"><div class="sel" id="stheme"></div></div>
             </div>
@@ -448,6 +455,7 @@
       <span><kbd id="actionkey">&larr;</kbd> خيارات</span>
       <span><kbd>Tab</kbd> غيّر الحالة</span>
       <span><kbd>Ctrl L</kbd> شكل القائمة</span>
+      <span><kbd>F5</kbd> تحديث</span>
     </div>
     <div id="foots">
       <span><kbd>Tab</kbd> تنقل</span>
